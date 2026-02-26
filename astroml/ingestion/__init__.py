@@ -3,4 +3,15 @@
 Provides streaming and batch data ingestion from the Stellar Horizon API
 into the local PostgreSQL database.
 """
-__all__ = ["config", "parsers", "stream"]
+from .service import IngestionService, IngestionResult
+from .state import IngestionState, StateStore
+
+__all__ = [
+    "config",
+    "parsers",
+    "stream",
+    "IngestionService",
+    "IngestionResult",
+    "IngestionState",
+    "StateStore",
+]
