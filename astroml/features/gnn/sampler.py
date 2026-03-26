@@ -48,8 +48,7 @@ class MultiHopSampler:
         adjs: List[Tuple[torch.Tensor, Tuple[int, int]]] = []
         current_nodes = target_nodes.clone()
 
-        node_sets: List[torch.Tensor] = [current_nodes]
-
+        # Discovery pass: walk outward to find all reachable nodes
         for num_samples in reversed(self.fanout):
             src, dst = sample_neighbors(self.edge_index, current_nodes, num_samples)
 
@@ -57,7 +56,6 @@ class MultiHopSampler:
                 new_nodes = src[~torch.isin(src, current_nodes)]
                 if new_nodes.numel() > 0:
                     current_nodes = torch.cat([current_nodes, new_nodes.unique()])
-            node_sets.append(current_nodes.clone())
 
         # Build all_nodes: target first, then rest
         all_nodes = current_nodes
@@ -91,7 +89,7 @@ class MultiHopSampler:
                 layer_dst_nodes = torch.cat([layer_dst_nodes, new_neighbors.unique()])
 
                 num_src = len(all_nodes_list)
-                num_dst = local_edge[1].max().item() + 1 if local_edge.numel() > 0 else 0
+                num_dst = len(layer_dst_nodes)
 
             adjs.append((local_edge, (num_src, int(num_dst))))
 
