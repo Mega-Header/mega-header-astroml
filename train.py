@@ -22,6 +22,7 @@ from hydra.utils import instantiate, get_original_cwd
 
 from mega-header-astroml.models.gcn import GCN
 from mega-header-astroml.tracking import MLflowTracker
+from mega-header-astroml.training.temporal_split import TemporalSplitter
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -37,6 +38,69 @@ def set_device(device_config: str) -> torch.device:
     
     logger.info(f"Using device: {device}")
     return device
+
+
+def apply_temporal_masks(data: Any, cfg: DictConfig) -> Any:
+    """Replace dataset masks with strict temporal train/val/test splits.
+
+    When ``training.temporal_split.enabled`` is true the existing random masks
+    on *data* are discarded and rebuilt so that:
+
+    * ``train_mask`` covers the earliest ``train_ratio`` fraction of nodes
+      (sorted by node index as a proxy for ingestion order when no explicit
+      timestamp is available on the graph data object).
+    * ``val_mask`` covers the next ``val_split`` fraction.
+    * ``test_mask`` covers the remaining nodes.
+
+    If the graph data carries a ``node_timestamps`` attribute it is used for
+    sorting instead of node index.
+    """
+    split_cfg = cfg.training.get("temporal_split", {})
+    if not split_cfg.get("enabled", False):
+        return data
+
+    n = data.num_nodes
+    train_ratio = split_cfg.get("train_ratio", 0.8)
+    val_split = cfg.training.get("val_split", 0.1)
+
+    # Determine sort order: prefer an explicit timestamp attribute, else use index.
+    if hasattr(data, "node_timestamps") and data.node_timestamps is not None:
+        order = data.node_timestamps.argsort()
+        logger.info("Temporal split: sorting nodes by node_timestamps attribute")
+    else:
+        order = torch.arange(n)
+        logger.info(
+            "Temporal split: no node_timestamps found — using node index as "
+            "temporal proxy (assumes nodes were appended in time order)"
+        )
+
+    train_end = int(n * train_ratio)
+    val_end = train_end + int(n * val_split)
+
+    train_nodes = order[:train_end]
+    val_nodes = order[train_end:val_end]
+    test_nodes = order[val_end:]
+
+    train_mask = torch.zeros(n, dtype=torch.bool)
+    val_mask = torch.zeros(n, dtype=torch.bool)
+    test_mask = torch.zeros(n, dtype=torch.bool)
+
+    train_mask[train_nodes] = True
+    val_mask[val_nodes] = True
+    test_mask[test_nodes] = True
+
+    data.train_mask = train_mask
+    data.val_mask = val_mask
+    data.test_mask = test_mask
+
+    logger.info(
+        "Temporal masks applied: train=%d val=%d test=%d (total %d nodes)",
+        train_mask.sum().item(),
+        val_mask.sum().item(),
+        test_mask.sum().item(),
+        n,
+    )
+    return data
 
 
 def load_dataset(cfg: DictConfig) -> Any:
@@ -151,6 +215,8 @@ def train(cfg: DictConfig) -> Dict[str, Any]:
 
     # Load dataset
     dataset, data = load_dataset(cfg)
+    # Apply temporal masks before moving to device (masks are CPU tensors).
+    data = apply_temporal_masks(data, cfg)
     data = data.to(device)
 
     # Create model
