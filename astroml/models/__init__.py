@@ -12,6 +12,10 @@ except ImportError:
     pass
 
 from .sage_encoder import InductiveSAGEEncoder
+from .deep_svdd import DeepSVDD, DeepSVDDNetwork
+from .deep_svdd_trainer import DeepSVDDTrainer, FraudDetectionDeepSVDD
+from .gcn import GCN
+from .link_prediction import LinkPredictor, GCNEncoder
 
 __all__ = [
     'DeepSVDD',
@@ -20,4 +24,7 @@ __all__ = [
     'FraudDetectionDeepSVDD',
     'GCN',
     'InductiveSAGEEncoder',
+]
+    'GCNEncoder',
+    'LinkPredictor',
 ]

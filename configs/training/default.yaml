@@ -16,6 +16,13 @@ val_split: 0.1
 test_split: 0.1
 shuffle: true
 
+# Temporal split — set shuffle: false when enabled to prevent leakage
+temporal_split:
+  enabled: false        # set true to enforce past-trains-on-future ordering
+  time_col: "timestamp" # DataFrame column or Edge attribute used as timestamp
+  train_ratio: 0.8      # fraction of (sorted) data assigned to train
+  cutoff: null          # optional explicit cutoff value; overrides train_ratio
+
 # Logging
 log_interval: 20
 save_best_only: true
