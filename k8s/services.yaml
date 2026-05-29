@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mega-header-astroml-ingestion
+  namespace: mega-header-astroml
+  labels:
+    app: mega-header-astroml-ingestion
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+    name: http
+  selector:
+    app: mega-header-astroml-ingestion
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mega-header-astroml-training
+  namespace: mega-header-astroml
+  labels:
+    app: mega-header-astroml-training
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6006
+    targetPort: 6006
+    name: tensorboard
+  selector:
+    app: mega-header-astroml-training
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mega-header-astroml-api
+  namespace: mega-header-astroml
+  labels:
+    app: mega-header-astroml-api
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+    name: http
+  selector:
+    app: mega-header-astroml-api
