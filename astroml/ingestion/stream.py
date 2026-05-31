@@ -301,13 +301,16 @@ class HorizonStreamClient:
 
 
 def _configure_logging() -> None:
-    """Configure structured logging for the streaming process."""
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s %(levelname)-8s [%(name)s] %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-        stream=sys.stderr,
-    )
+    """Configure structured logging for the streaming process.
+
+    Delegates to :func:`mega-header-astroml.utils.logging.configure_logging` so log
+    level (``ASTROML_LOG_LEVEL``) and format (``ASTROML_LOG_FORMAT=
+    text|json``) are consistent across every mega-header-astroml entry point. See
+    issue #195.
+    """
+    from mega-header-astroml.utils.logging import configure_logging
+
+    configure_logging()
 
 
 def _parse_cli_args() -> StreamConfig:
