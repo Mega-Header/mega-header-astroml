@@ -360,7 +360,7 @@ class TestFullPipelineIntegration:
         test_session.commit()
 
         # Step 2: Create graph snapshot
-        from mega-header-astroml.features.graph.snapshot import Edge, snapshot_last_n_days
+        from mega-header-astroml.features.graph.snapshot import snapshot_last_n_days
         
         base_ts = int(base_time.timestamp())
         edges = [
