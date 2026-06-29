@@ -1,0 +1,76 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mega-header-astroml-ingress
+  namespace: mega-header-astroml
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - mega-header-astroml.example.com
+    secretName: mega-header-astroml-tls
+  rules:
+  - host: mega-header-astroml.example.com
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: mega-header-astroml-ingestion
+            port:
+              number: 8000
+      - path: /feature-store
+        pathType: Prefix
+        backend:
+          service:
+            name: feature-store
+            port:
+              number: 8000
+      - path: /training
+        pathType: Prefix
+        backend:
+          service:
+            name: mega-header-astroml-training
+            port:
+              number: 6006
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mega-header-astroml-monitoring-ingress
+  namespace: mega-header-astroml
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - monitoring.mega-header-astroml.example.com
+    secretName: mega-header-astroml-monitoring-tls
+  rules:
+  - host: monitoring.mega-header-astroml.example.com
+    http:
+      paths:
+      - path: /grafana
+        pathType: Prefix
+        backend:
+          service:
+            name: grafana
+            port:
+              number: 3000
+      - path: /prometheus
+        pathType: Prefix
+        backend:
+          service:
+            name: prometheus
+            port:
+              number: 9090
