@@ -9,6 +9,8 @@ resources:
   - redis-deployment.yaml
   - feature-store-deployment.yaml
   - mega-header-astroml-deployment.yaml
+  - mega-header-astroml-api-deployment.yaml
+  - llm-canary-deployment.yaml
   - services.yaml
   - ingress.yaml
   - monitoring.yaml
