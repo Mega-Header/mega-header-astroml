@@ -52,6 +52,9 @@ format-check:
 	black --check mega-header-astroml/ tests/ api/
 	ruff check --select I mega-header-astroml/ tests/ api/
 
+complexity:
+	xenon --max-absolute C --max-modules D --max-average C mega-header-astroml/
+
 # Issue #562 — resolved dependency tree, e.g. to check what a pin bump would
 # actually pull in, or to spot conflicting transitive requirements. Requires
 # pipdeptree, installed via requirements-dev.txt.
