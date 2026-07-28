@@ -1,8 +1,8 @@
 """Report backfill job — batch generate monthly reports."""
 
 from typing import Any
-from mega-header-astroml.llm.providers.base import LLMProvider
 
+from mega-header-astroml.llm.providers.base import LLMProvider
 
 REPORT_PROMPT = """Generate a monthly summary report based on the following data:
 Month: {month}

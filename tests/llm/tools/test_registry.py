@@ -1,6 +1,7 @@
 """Tests for tool registry."""
 
 import pytest
+
 from mega-header-astroml.llm.tools import ToolRegistry, get_global_registry, reset_registry
 from mega-header-astroml.llm.tools.definitions import BaseTool
 

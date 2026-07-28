@@ -1,8 +1,8 @@
 """Label backfill job — auto-label transactions for ML training."""
 
 from typing import Any
-from mega-header-astroml.llm.providers.base import LLMProvider
 
+from mega-header-astroml.llm.providers.base import LLMProvider
 
 LABEL_PROMPT = """Classify this transaction into exactly one category: payment, transfer, exchange, fraud, or other.
 Transaction: {description}
