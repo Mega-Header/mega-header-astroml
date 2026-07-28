@@ -1,4 +1,5 @@
 """Contributor onboarding checklist API — Issue #281."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -26,7 +27,7 @@ def complete_step(github_username: str, body: OnboardingStepIn):
     try:
         progress = _tracker.complete_step(github_username, body.step)
     except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
+        raise HTTPException(status_code=422, detail="Validation error") from exc
     return _to_out(progress)
 
 

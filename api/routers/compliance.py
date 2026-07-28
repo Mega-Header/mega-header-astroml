@@ -1,13 +1,14 @@
 """Compliance and audit endpoints for LLM interactions (issue #412)."""
+
 from __future__ import annotations
 
 from datetime import datetime, timedelta
-from typing import Optional, Any
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.auth.dependencies import get_current_auth, AuthContext
+from api.auth.dependencies import AuthContext, get_current_auth
 from api.database import get_db
 from mega-header-astroml.llm.compliance_logger import compliance_logger
 
@@ -16,11 +17,13 @@ router = APIRouter(prefix="/api/v1/compliance", tags=["compliance"])
 
 class AuditReportResponse(dict):
     """Audit report response."""
+
     pass
 
 
 class ExportResponse(dict):
     """Export response."""
+
     pass
 
 
@@ -51,9 +54,9 @@ async def get_audit_report(
         )
         return AuditReportResponse(report)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail="Invalid request")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/export")
@@ -88,8 +91,9 @@ async def export_logs(
         )
 
         if format == "csv":
-            from fastapi.responses import StreamingResponse
             from io import BytesIO
+
+            from fastapi.responses import StreamingResponse
 
             csv_bytes = BytesIO(exported.encode())
             return StreamingResponse(
@@ -100,9 +104,9 @@ async def export_logs(
         else:
             return ExportResponse({"data": exported})
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail="Invalid request")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/logs")
@@ -148,4 +152,4 @@ async def get_logs(
             ],
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")

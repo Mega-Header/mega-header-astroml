@@ -1,4 +1,5 @@
 """Model scorer loading with registry integration (issues #237, #254)."""
+
 from __future__ import annotations
 
 import logging
@@ -16,10 +17,11 @@ logger = logging.getLogger(__name__)
 def _load_scorer_from_path(checkpoint: str):
     """Load InductiveAnomalyScorer from a checkpoint path."""
     try:
-        from mega-header-astroml.pipeline.scoring import InductiveAnomalyScorer  # noqa: PLC0415
-        from mega-header-astroml.pipeline.inductive import InductiveGraphSAGE  # noqa: PLC0415
-        from mega-header-astroml.models.deep_svdd import DeepSVDD  # noqa: PLC0415
         import torch  # noqa: PLC0415
+
+        from mega-header-astroml.models.deep_svdd import DeepSVDD  # noqa: PLC0415
+        from mega-header-astroml.pipeline.inductive import InductiveGraphSAGE  # noqa: PLC0415
+        from mega-header-astroml.pipeline.scoring import InductiveAnomalyScorer  # noqa: PLC0415
 
         if not os.path.exists(checkpoint):
             logger.warning("Model checkpoint not found at %s", checkpoint)
