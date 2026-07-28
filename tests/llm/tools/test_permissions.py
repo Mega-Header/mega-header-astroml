@@ -1,6 +1,7 @@
 """Tests for tool permission system."""
 
 import pytest
+
 from mega-header-astroml.llm.tools.permissions import PermissionChecker, PermissionDenied
 
 

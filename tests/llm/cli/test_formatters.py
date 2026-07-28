@@ -1,6 +1,7 @@
 """Tests for CLI formatters."""
 
 import json
+
 from mega-header-astroml.cli_llm.formatters import output_result
 
 

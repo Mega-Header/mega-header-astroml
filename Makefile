@@ -1,4 +1,4 @@
-.PHONY: help quickstart test test-api lint format clean install run-api canary-deploy canary-promote rollback-llm dependency-tree llm-test llm-eval llm-cost-check llm-validate-prompts llm-safety-scan security-audit secrets-scan benchmark
+.PHONY: help quickstart test test-api lint format clean install run-api canary-deploy canary-promote rollback-llm dependency-tree llm-test llm-eval llm-cost-check llm-validate-prompts llm-safety-scan security-audit secrets-scan complexity
 
 help:
 	@echo "AstroML Development Commands"
@@ -8,8 +8,10 @@ help:
 	@echo "make quickstart-verbose  Run quick start with verbose output"
 	@echo "make test                Run full test suite"
 	@echo "make test-api            Run API integration tests only"
-	@echo "make lint                Run linters (flake8, mypy)"
+	@echo "make lint                Run linters (ruff, mypy)"
 	@echo "make format              Format code (black, isort)"
+	@echo "make format-check        Check formatting without modifying files"
+	@echo "make complexity          Run code complexity analysis (xenon)"
 	@echo "make install             Install development dependencies"
 	@echo "make dependency-tree     Print the resolved dependency tree (pipdeptree)"
 	@echo "make clean               Clean build artifacts and cache"
@@ -40,12 +42,19 @@ test-api:
 	pytest api/tests/ -v --tb=short
 
 lint:
-	flake8 mega-header-astroml/ tests/
+	ruff check mega-header-astroml/ tests/ api/
 	mypy mega-header-astroml/ --ignore-missing-imports
 
 format:
-	black mega-header-astroml/ tests/
-	isort mega-header-astroml/ tests/
+	black mega-header-astroml/ tests/ api/
+	ruff check --fix --select I mega-header-astroml/ tests/ api/
+
+format-check:
+	black --check mega-header-astroml/ tests/ api/
+	ruff check --select I mega-header-astroml/ tests/ api/
+
+complexity:
+	xenon --max-absolute C --max-modules D --max-average C mega-header-astroml/
 
 # Issue #562 — resolved dependency tree, e.g. to check what a pin bump would
 # actually pull in, or to spot conflicting transitive requirements. Requires
