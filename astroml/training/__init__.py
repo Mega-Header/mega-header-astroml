@@ -20,11 +20,17 @@ __all__ = [
     "EarlyStoppingConfig",
     "TemporalSplitConfig",
     "OptimizerConfig",
+    "ONNXConverter",
+    "ONNXOptimizer",
+    "QuantizationConfig",
 ]
 
 _LAZY = {
     "train_link_prediction": ("mega-header-astroml.training.train_link_prediction", "train_link_prediction"),
     "train_link_prediction_main": ("mega-header-astroml.training.train_link_prediction", "main"),
+    "ONNXConverter": ("mega-header-astroml.training.optimization.onnx_converter", "ONNXConverter"),
+    "ONNXOptimizer": ("mega-header-astroml.training.optimization.onnx_optimizer", "ONNXOptimizer"),
+    "QuantizationConfig": ("mega-header-astroml.training.optimization.quantization", "QuantizationConfig"),
 }
 
 
