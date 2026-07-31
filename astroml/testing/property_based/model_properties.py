@@ -24,7 +24,6 @@ from mega-header-astroml.testing.property_based.strategies import (
     probability_output_strategy,
 )
 
-
 # ── Type aliases ──────────────────────────────────────────────────────────────
 
 ModelCallable = Callable[[np.ndarray], np.ndarray]
