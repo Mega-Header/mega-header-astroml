@@ -6,4 +6,5 @@ from mega-header-astroml.db.models. New code should import directly from db.mode
 Dependencies:
 - mega-header-astroml.db.models: ORM model definitions
 """
+
 from mega-header-astroml.db.models import *  # noqa: F401, F403
