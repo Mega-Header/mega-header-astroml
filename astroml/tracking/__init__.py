@@ -29,6 +29,15 @@ __all__ = [
     "ProvenanceTracker",
     "LineageVisualizer",
     "MetadataStore",
+    "Budget",
+    "BudgetManager",
+    "BudgetPeriod",
+    "CostRecord",
+    "CostTracker",
+    "ResourceOptimizer",
+    "ResourceType",
+    "ResourceUsageSample",
+    "default_cost_tracker",
 ]
 
 _LAZY: dict[str, tuple[str, str]] = {
@@ -36,6 +45,15 @@ _LAZY: dict[str, tuple[str, str]] = {
     "ProvenanceTracker": ("mega-header-astroml.tracking.lineage.provenance", "ProvenanceTracker"),
     "LineageVisualizer": ("mega-header-astroml.tracking.lineage.visualizer", "LineageVisualizer"),
     "MetadataStore": ("mega-header-astroml.tracking.lineage.metadata_store", "MetadataStore"),
+    "Budget": ("mega-header-astroml.tracking.budget_manager", "Budget"),
+    "BudgetManager": ("mega-header-astroml.tracking.budget_manager", "BudgetManager"),
+    "BudgetPeriod": ("mega-header-astroml.tracking.budget_manager", "BudgetPeriod"),
+    "CostRecord": ("mega-header-astroml.tracking.cost_tracker", "CostRecord"),
+    "CostTracker": ("mega-header-astroml.tracking.cost_tracker", "CostTracker"),
+    "ResourceType": ("mega-header-astroml.tracking.cost_tracker", "ResourceType"),
+    "default_cost_tracker": ("mega-header-astroml.tracking.cost_tracker", "default_cost_tracker"),
+    "ResourceOptimizer": ("mega-header-astroml.tracking.resource_optimizer", "ResourceOptimizer"),
+    "ResourceUsageSample": ("mega-header-astroml.tracking.resource_optimizer", "ResourceUsageSample"),
 }
 
 
