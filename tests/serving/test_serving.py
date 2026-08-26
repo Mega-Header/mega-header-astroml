@@ -2,6 +2,7 @@ from mega-header-astroml.serving.grpc_server import GrpcServer
 from mega-header-astroml.serving.model_loader import ModelLoader
 from mega-header-astroml.serving.tf_serving import TFServingClient
 
+
 def test_grpc_server():
     server = GrpcServer()
     server.start(50051)

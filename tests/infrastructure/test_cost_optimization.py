@@ -1,5 +1,6 @@
 import pytest
-from mega-header-astroml.infrastructure.cost_optimizer import CostOptimizer, CostAllocation
+
+from mega-header-astroml.infrastructure.cost_optimizer import CostAllocation, CostOptimizer
 from mega-header-astroml.infrastructure.recommendations import RecommendationEngine
 from mega-header-astroml.infrastructure.resource_analyzer import (
     ResourceAnalyzer,

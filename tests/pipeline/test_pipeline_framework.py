@@ -30,7 +30,6 @@ from mega-header-astroml.pipeline.testing.schema_validator import (
     ValidationStatus,
 )
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------

@@ -1,30 +1,31 @@
 """Comprehensive tests for continuous learning and incremental retraining."""
 
-import unittest
 import math
 import random
-from mega-header-astroml.training.incremental.online_learner import (
-    OnlineLearnerConfig,
-    OnlineSGDClassifier,
-    OnlineSGDRegressor,
-    OnlinePassiveAggressiveClassifier,
-    OnlinePassiveAggressiveRegressor,
-)
-from mega-header-astroml.training.incremental.adaptive_model import (
-    AdaptiveModelConfig,
-    AdaptiveModel,
-    ExperienceReplayBuffer,
-    EWCRegularizer,
-)
-from mega-header-astroml.training.incremental.stream_trainer import (
-    StreamTrainerConfig,
-    StreamTrainer,
-    StreamDataIngestor,
-)
+import unittest
+
 from mega-header-astroml.training.continuous_learning import (
-    ModelVersionManager,
     ContinuousLearningPipeline,
     ContinuousLearningPipelineConfig,
+    ModelVersionManager,
+)
+from mega-header-astroml.training.incremental.adaptive_model import (
+    AdaptiveModel,
+    AdaptiveModelConfig,
+    EWCRegularizer,
+    ExperienceReplayBuffer,
+)
+from mega-header-astroml.training.incremental.online_learner import (
+    OnlineLearnerConfig,
+    OnlinePassiveAggressiveClassifier,
+    OnlinePassiveAggressiveRegressor,
+    OnlineSGDClassifier,
+    OnlineSGDRegressor,
+)
+from mega-header-astroml.training.incremental.stream_trainer import (
+    StreamDataIngestor,
+    StreamTrainer,
+    StreamTrainerConfig,
 )
 
 

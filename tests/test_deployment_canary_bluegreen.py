@@ -2,7 +2,7 @@
 
 import time
 
-from mega-header-astroml.deployment.blue_green import BlueGreenConfig, BlueGreenManager, BGPhase
+from mega-header-astroml.deployment.blue_green import BGPhase, BlueGreenConfig, BlueGreenManager
 from mega-header-astroml.deployment.canary import (
     CanaryConfig,
     CanaryDeployment,
@@ -11,7 +11,6 @@ from mega-header-astroml.deployment.canary import (
 )
 from mega-header-astroml.deployment.rollback_manager import RollbackManager
 from mega-header-astroml.deployment.traffic_router import RouteTarget, TrafficRouter
-
 
 # ---------------------------------------------------------------------------
 # CanaryManager
