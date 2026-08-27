@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from mega-header-astroml.preprocessing.multimodal import MultiModalSample, collate_batch
 from mega-header-astroml.training.multimodal import (
     AttentionFusion,
     ConcatenationFusion,
@@ -27,8 +28,6 @@ from mega-header-astroml.training.multimodal import (
     TextEncoderType,
     create_fusion,
 )
-from mega-header-astroml.preprocessing.multimodal import MultiModalSample, collate_batch
-
 
 # ---------------------------------------------------------------------------
 # Encoders
