@@ -4,8 +4,7 @@ import tempfile
 from pathlib import Path
 
 from mega-header-astroml.pipeline.dvc_pipeline import DVCPipelineManager, PipelineDefinition
-from mega-header-astroml.storage.data_versioning import DataVersionControl, DatasetVersion, VersionDiff
-
+from mega-header-astroml.storage.data_versioning import DatasetVersion, DataVersionControl, VersionDiff
 
 # ---------------------------------------------------------------------------
 # DataVersionControl (without DVC binary)
