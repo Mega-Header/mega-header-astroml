@@ -24,7 +24,6 @@ from mega-header-astroml.preprocessing.labeling.active_learning import (
 from mega-header-astroml.preprocessing.labeling.review_queue import LabelQualityMetrics
 from mega-header-astroml.preprocessing.labeling.weak_supervision import ABSTAIN, MajorityVoter
 
-
 # ---------------------------------------------------------------------------
 # Active learning
 # ---------------------------------------------------------------------------
