@@ -1,0 +1,17 @@
+[core]
+    remote = mega-header-astroml-remote
+    autostage = true
+
+['remote "mega-header-astroml-remote"']
+    url = s3://mega-header-astroml-datasets/dvc-store
+    endpointurl = https://s3.amazonaws.com
+
+[hydra]
+    enabled = false
+
+[cache]
+    dir = .dvc/cache
+    type = symlink
+
+[plots]
+    html_template = .dvc/plots/default.html
