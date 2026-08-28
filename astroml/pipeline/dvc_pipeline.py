@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
-from mega-header-astroml.storage.data_versioning import DatasetVersion, DataVersionControl
+from mega-header-astroml.storage.data_versioning import DataVersionControl, DatasetVersion
 
 logger = logging.getLogger(__name__)
 
