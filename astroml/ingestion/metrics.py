@@ -44,3 +44,20 @@ STREAM_LAG_SECONDS = Gauge(
     "Current lag in seconds (time since last record's created_at)",
     ["stream_type", "horizon_url"],
 )
+
+# Batch UPSERT metrics
+BATCH_BUFFER_SIZE = Gauge(
+    "mega-header-astroml_ingestion_batch_buffer_size",
+    "Current number of models in the batch buffer",
+)
+
+BATCH_FLUSH_TOTAL = Counter(
+    "mega-header-astroml_ingestion_batch_flushes_total",
+    "Total number of batch flush operations",
+    ["status"],
+)
+
+BATCH_FLUSH_DURATION = Histogram(
+    "mega-header-astroml_ingestion_batch_flush_seconds",
+    "Time spent flushing a batch of models",
+)
