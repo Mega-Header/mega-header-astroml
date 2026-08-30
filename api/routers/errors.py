@@ -8,6 +8,7 @@ a user's session has expired (which is often the condition that triggered the
 error in the first place).  Rate-limiting and input size caps guard against
 abuse.
 """
+
 from __future__ import annotations
 
 import logging
@@ -17,6 +18,8 @@ from typing import Any, Dict, Optional
 from fastapi import APIRouter, Request, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, field_validator
+
+from mega-header-astroml.utils.logging import sanitize_log_value
 
 logger = logging.getLogger("mega-header-astroml.frontend_errors")
 
@@ -28,6 +31,7 @@ _MAX_STACK_LEN = 8000
 
 
 # ── Schema ────────────────────────────────────────────────────────────────────
+
 
 class FrontendErrorReport(BaseModel):
     """Payload sent by the browser ErrorBoundary / errorReporting module."""
@@ -52,6 +56,7 @@ class FrontendErrorReport(BaseModel):
 
 # ── Endpoint ──────────────────────────────────────────────────────────────────
 
+
 @router.post(
     "/report",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -70,14 +75,13 @@ async def report_error(report: FrontendErrorReport, request: Request) -> JSONRes
         "Frontend error reported",
         extra={
             "frontend_error": {
-                "message": report.message,
-                "boundary": report.boundary,
-                "url": report.url,
-                "user_agent": report.user_agent,
+                "message": sanitize_log_value(report.message),
+                "boundary": sanitize_log_value(report.boundary),
+                "url": sanitize_log_value(report.url),
+                "user_agent": sanitize_log_value(report.user_agent),
                 "timestamp": report.timestamp or datetime.now(timezone.utc).isoformat(),
-                "client_ip": client_ip,
-                # Truncate stacks in the structured log to keep it readable
-                "stack_preview": (report.stack or "")[:500] or None,
+                "client_ip": sanitize_log_value(client_ip),
+                "stack_preview": sanitize_log_value((report.stack or "")[:500] or ""),
                 "extra": report.extra,
             }
         },

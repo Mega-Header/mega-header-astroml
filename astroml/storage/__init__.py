@@ -1,4 +1,5 @@
 """Artifact storage module with support for multiple backends."""
+
 from mega-header-astroml.storage.artifact_store import (
     ArtifactStore,
     GCSArtifactStore,
@@ -12,6 +13,12 @@ from mega-header-astroml.storage.config import (
     LocalStorageConfig,
     S3StorageConfig,
 )
+from mega-header-astroml.storage.data_versioning import (
+    DatasetVersion,
+    DataVersionControl,
+    VersionDiff,
+)
+from mega-header-astroml.storage.model_store import ModelStore
 
 __all__ = [
     "ArtifactStore",
@@ -23,4 +30,9 @@ __all__ = [
     "LocalStorageConfig",
     "S3StorageConfig",
     "GCSStorageConfig",
+    "DataVersionControl",
+    "DatasetVersion",
+    "VersionDiff",
+    "ModelStore",
 ]
+

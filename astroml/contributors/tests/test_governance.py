@@ -1,16 +1,15 @@
 """Tests for mega-header-astroml.contributors.governance."""
+
 from __future__ import annotations
 
 import pytest
 
 from mega-header-astroml.contributors.governance import (
     CONTRIBUTION_THRESHOLDS,
-    ROLE_PERMISSIONS,
     ROLES,
     ContributorRecord,
     GovernanceSystem,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mega-header-astroml-model
+  namespace: mega-header-astroml
+  labels:
+    app: mega-header-astroml-model
+    managed-by: gitops
+  annotations:
+    gitops.mega-header-astroml.io/managed: "true"
+    gitops.mega-header-astroml.io/sync-policy: automated
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mega-header-astroml-model
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: mega-header-astroml-model
+      annotations:
+        gitops.mega-header-astroml.io/revision: "{{ .Values.revision }}"
+    spec:
+      serviceAccountName: mega-header-astroml
+      containers:
+      - name: model-server
+        image: ghcr.io/mega-header-astroml/mega-header-astroml:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: mega-header-astroml-config
+              key: DATABASE_URL
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: mega-header-astroml-config
+              key: REDIS_URL
+        - name: MODEL_VERSION
+          valueFrom:
+            configMapKeyRef:
+              name: mega-header-astroml-gitops-config
+              key: MODEL_VERSION
+        command: ["python", "-m", "mega-header-astroml.api.server"]
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: models
+          mountPath: /app/models
+          readOnly: true
+      volumes:
+      - name: models
+        persistentVolumeClaim:
+          claimName: mega-header-astroml-models-pvc
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mega-header-astroml-gitops-config
+  namespace: mega-header-astroml
+  labels:
+    managed-by: gitops
+  annotations:
+    gitops.mega-header-astroml.io/managed: "true"
+data:
+  MODEL_VERSION: "latest"
+  SYNC_INTERVAL: "60s"
+  DRIFT_DETECTION_ENABLED: "true"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mega-header-astroml-model-svc
+  namespace: mega-header-astroml
+  labels:
+    app: mega-header-astroml-model
+    managed-by: gitops
+spec:
+  selector:
+    app: mega-header-astroml-model
+  ports:
+  - port: 80
+    targetPort: 8000
+    name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mega-header-astroml-models-pvc
+  namespace: mega-header-astroml
+  labels:
+    managed-by: gitops
+spec:
+  accessModes:
+  - ReadOnlyMany
+  resources:
+    requests:
+      storage: 10Gi

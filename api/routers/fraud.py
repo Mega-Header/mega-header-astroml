@@ -4,6 +4,8 @@ Endpoints:
   POST /api/v1/fraud/score   — real-time anomaly scoring
   GET  /api/v1/fraud/alerts  — paginated fraud alerts
   GET  /api/v1/fraud/stats   — aggregated fraud statistics
+  GET  /api/v1/fraud/{id}/explanation — LLM explanation for fraud alert
+  GET  /api/v1/fraud/alerts/prioritized — prioritized, deduplicated alerts
 
 Model loading
 -------------
@@ -11,35 +13,36 @@ Models are loaded lazily on first request and cached in module-level state.
 The active model version from the registry takes precedence over
 ``MODEL_CHECKPOINT_PATH`` when set.
 """
+
 from __future__ import annotations
 
 import logging
+import time
 from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import cast, func, select, Date
+from sqlalchemy import Date, cast, func, select
 from sqlalchemy.orm import Session
 
 from api.database import get_sync_db
-from api.models.orm import FraudAlert
+from api.graphql import publish_fraud_alert
+from api.models.orm import ApiTransaction, FraudAlert
 from api.schemas import (
     FraudAlertOut,
     FraudAlertsResponse,
-    FraudStatsResponse,
     FraudExplanationOut,
+    FraudStatsResponse,
+    PrioritizedAlertOut,
+    PrioritizedAlertsResponse,
     RiskPoint,
     ScoreRequest,
     ScoreResponse,
-    PrioritizedAlertsResponse,
-    PrioritizedAlertOut,
     TransactionSummaryOut,
 )
 from api.services.alert_prioritization import alert_prioritizer
 from api.services.scorer import invalidate_scorer_cache, load_scorer
-from api.models.orm import FraudAlert, ApiTransaction
 from mega-header-astroml.llm.explainer import FraudExplainer
-import time
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/fraud", tags=["fraud"])
@@ -52,6 +55,7 @@ def _get_scorer():
 
 
 # ─── Endpoints ───────────────────────────────────────────────────────────────
+
 
 @router.post("/score", response_model=ScoreResponse)
 async def score_accounts(body: ScoreRequest):
@@ -71,7 +75,9 @@ async def score_accounts(body: ScoreRequest):
         )
     except Exception as exc:  # noqa: BLE001
         logger.error("Scoring failed: %s", exc, exc_info=True)
-        raise HTTPException(status_code=503, detail="Scoring service temporarily unavailable") from exc
+        raise HTTPException(
+            status_code=503, detail="Scoring service temporarily unavailable"
+        ) from exc
 
     return ScoreResponse(scores=scores)
 
@@ -102,15 +108,14 @@ def get_fraud_alerts(
 @router.get("/stats", response_model=FraudStatsResponse)
 def get_fraud_stats(db: Session = Depends(get_sync_db)):
     """Return aggregated fraud statistics."""
+
     def _count(level: str) -> int:
-        return db.scalar(
-            select(func.count(FraudAlert.id)).where(FraudAlert.risk_level == level)
-        ) or 0
+        return (
+            db.scalar(select(func.count(FraudAlert.id)).where(FraudAlert.risk_level == level)) or 0
+        )
 
     total = db.scalar(select(func.count(FraudAlert.id))) or 0
-    recent = db.scalars(
-        select(FraudAlert).order_by(FraudAlert.detected_at.desc()).limit(10)
-    ).all()
+    recent = db.scalars(select(FraudAlert).order_by(FraudAlert.detected_at.desc()).limit(10)).all()
 
     daily = db.execute(
         select(
@@ -129,8 +134,7 @@ def get_fraud_stats(db: Session = Depends(get_sync_db)):
         low_risk=_count("low"),
         recent_alerts=[FraudAlertOut.model_validate(r) for r in recent],
         risk_over_time=[
-            RiskPoint(date=str(row.day), score=round(float(row.avg_score), 4))
-            for row in daily
+            RiskPoint(date=str(row.day), score=round(float(row.avg_score), 4)) for row in daily
         ],
     )
 
@@ -141,7 +145,7 @@ def get_fraud_explanation(id: int, db: Session = Depends(get_sync_db)):
     alert = db.get(FraudAlert, id)
     if not alert:
         raise HTTPException(status_code=404, detail="Alert not found")
-        
+
     # Fetch recent transactions as evidence
     txs = db.scalars(
         select(ApiTransaction)
@@ -149,40 +153,43 @@ def get_fraud_explanation(id: int, db: Session = Depends(get_sync_db)):
         .order_by(ApiTransaction.created_at.desc())
         .limit(10)
     ).all()
-    
+
     tx_dicts = [
         {
             "hash": tx.hash,
             "amount": float(tx.amount) if tx.amount else 0.0,
             "asset_code": tx.asset_code or "XLM",
             "destination_account": tx.destination_account,
-            "ledger_sequence": tx.ledger_sequence
-        } for tx in txs
+            "ledger_sequence": tx.ledger_sequence,
+        }
+        for tx in txs
     ]
-    
+
     start_time = time.time()
-    
+
     explanation = explainer.generate_explanation(
         alert_id=alert.id,
         account_id=alert.account_id,
         pattern=alert.pattern or "unknown",
         score=alert.risk_score,
-        transactions=tx_dicts
+        transactions=tx_dicts,
     )
-    
+
     end_time = time.time()
     elapsed_ms = (end_time - start_time) * 1000.0
-    
+
     return FraudExplanationOut(
         alert_id=alert.id,
         explanation=explanation,
         generated_in_ms=elapsed_ms,
-        cached=elapsed_ms < 100.0  # Simple heuristic for now
+        cached=elapsed_ms < 100.0,  # Simple heuristic for now
     )
 
 
 @router.get("/alerts/prioritized", response_model=PrioritizedAlertsResponse)
-@router.get("/api/v1/alerts/prioritized", response_model=PrioritizedAlertsResponse, include_in_schema=False)
+@router.get(
+    "/api/v1/alerts/prioritized", response_model=PrioritizedAlertsResponse, include_in_schema=False
+)
 def get_prioritized_alerts(
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_sync_db),
@@ -221,7 +228,8 @@ def get_prioritized_alerts(
                         asset_code=tx["asset_code"],
                         destination_account=tx["destination_account"],
                         created_at=tx["created_at"],
-                    ) for tx in enriched.recent_transactions
+                    )
+                    for tx in enriched.recent_transactions
                 ],
                 account_activity_score=enriched.account_activity_score,
                 is_duplicate=enriched.is_duplicate,
@@ -237,5 +245,65 @@ def get_prioritized_alerts(
     )
 
 
+# ─── Fraud Alert Creation ────────────────────────────────────────────────────
+
+
+async def create_fraud_alert(
+    account_id: str,
+    risk_score: float,
+    pattern: Optional[str] = None,
+    description: Optional[str] = None,
+    db: Session = Depends(get_sync_db),
+) -> FraudAlert:
+    """
+    Create a new fraud alert and publish to GraphQL subscriptions.
+
+    Args:
+        account_id: The account ID associated with the fraud alert
+        risk_score: The risk score (0.0 to 1.0)
+        pattern: Optional pattern identifier (e.g., sybil_cluster)
+        description: Optional description of the alert
+        db: Database session
+
+    Returns:
+        The created FraudAlert instance
+    """
+    risk_level = FraudAlert.risk_level_for_score(risk_score)
+
+    alert = FraudAlert(
+        account_id=account_id,
+        pattern=pattern,
+        risk_score=risk_score,
+        risk_level=risk_level,
+        description=description,
+    )
+
+    db.add(alert)
+    db.commit()
+    db.refresh(alert)
+
+    # Publish to GraphQL subscription
+    await publish_fraud_alert(
+        {
+            "id": alert.id,
+            "account_id": alert.account_id,
+            "pattern": alert.pattern,
+            "risk_score": alert.risk_score,
+            "risk_level": alert.risk_level,
+            "description": alert.description,
+            "detected_at": alert.detected_at,
+        }
+    )
+
+    logger.info(
+        "Fraud alert created: id=%d, account=%s, risk_level=%s",
+        alert.id,
+        alert.account_id,
+        alert.risk_level,
+    )
+
+    return alert
+
+
 # Re-export for model activation hook
-__all__ = ["router", "invalidate_scorer_cache"]
+__all__ = ["router", "invalidate_scorer_cache", "create_fraud_alert"]
