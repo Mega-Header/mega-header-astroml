@@ -61,3 +61,20 @@ BATCH_FLUSH_DURATION = Histogram(
     "mega-header-astroml_ingestion_batch_flush_seconds",
     "Time spent flushing a batch of models",
 )
+
+# Per-batch ingestion progress / throughput metrics (Issue #727)
+INGESTION_BATCH_DURATION_SECONDS = Histogram(
+    "mega-header-astroml_ingestion_batch_duration_seconds",
+    "Wall-clock time spent processing one batch of ledgers",
+)
+
+INGESTION_BATCH_LEDGERS = Counter(
+    "mega-header-astroml_ingestion_batch_ledgers_total",
+    "Total number of ledgers handled in batch metrics",
+    ["status"],
+)
+
+INGESTION_BATCH_THROUGHPUT = Gauge(
+    "mega-header-astroml_ingestion_batch_throughput_ledgers_per_second",
+    "Ledgers processed per second during the most recent batch",
+)
