@@ -1,3 +1,4 @@
+from mega-header-astroml.utils.exceptions import AstroMLError
 """OpenAI embedding provider.
 
 Uses ``text-embedding-3-small`` (1536-dim) by default.  Falls back

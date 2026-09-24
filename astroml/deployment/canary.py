@@ -1,3 +1,4 @@
+from mega-header-astroml.utils.exceptions import AstroMLError
 """Canary deployment strategy for safe model rollouts.
 
 Gradually shifts traffic from the current (stable) model to a new (canary)
