@@ -14,7 +14,6 @@ from pydantic import ValidationError
 
 from mega-header-astroml.db.session import Page, PageParams, paginate_offset
 
-
 # ---------------------------------------------------------------------------
 # PageParams
 # ---------------------------------------------------------------------------
