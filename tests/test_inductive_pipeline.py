@@ -1,8 +1,8 @@
 from __future__ import annotations
-from mega-header-astroml.features.graph.snapshot import Edge
 
 import torch
 
+from mega-header-astroml.features.graph.snapshot import Edge
 from mega-header-astroml.models.sage_encoder import InductiveSAGEEncoder
 from mega-header-astroml.pipeline.inductive import InductiveGraphSAGE
 

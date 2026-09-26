@@ -6,8 +6,8 @@ import logging
 
 import pytest
 
-from mega-header-astroml.utils.logging import configure_logging, StructuredJsonFormatter
 from mega-header-astroml.features import feature_store
+from mega-header-astroml.utils.logging import StructuredJsonFormatter, configure_logging
 
 
 @pytest.fixture(autouse=True)
