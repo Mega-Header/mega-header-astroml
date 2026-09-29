@@ -1,3 +1,4 @@
+from mega-header-astroml.utils.exceptions import AstroMLError
 """ONNX Runtime inference wrapper for model serving."""
 
 from __future__ import annotations
