@@ -44,7 +44,7 @@ This guide provides comprehensive instructions for setting up, developing, train
 ### 1. Clone and Setup
 
 ```bash
-git clone https://github.com/Menjay7/mega-header-astroml.git
+git clone https://github.com/Mega-Header/mega-header-astroml.git
 cd mega-header-astroml
 
 cp .env.example .env
@@ -643,8 +643,8 @@ done
 ## Support
 
 For issues or questions:
-- GitHub Issues: https://github.com/jaynomyaro/mega-header-astroml/issues
-- Documentation: https://github.com/jaynomyaro/mega-header-astroml/docs
+- GitHub Issues: https://github.com/Mega-Header/mega-header-astroml/issues
+- Documentation: https://github.com/Mega-Header/mega-header-astroml/docs
 - Docker Documentation: https://docs.docker.com
 
 docker run --rm \

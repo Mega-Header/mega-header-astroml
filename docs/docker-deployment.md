@@ -36,7 +36,7 @@ The AstroML Docker setup includes:
 
 1. **Clone and navigate to the project:**
    ```bash
-   git clone https://github.com/tecch-wiz/mega-header-astroml.git
+   git clone https://github.com/Mega-Header/mega-header-astroml.git
    cd mega-header-astroml
    ```
 
