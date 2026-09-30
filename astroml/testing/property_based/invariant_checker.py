@@ -1,3 +1,4 @@
+from mega-header-astroml.utils.exceptions import AstroMLError
 """Invariant checker for ML model outputs.
 
 Implements Procedure step 4:

@@ -1,3 +1,4 @@
+from mega-header-astroml.utils.exceptions import AstroMLError
 """Model quantization utilities supporting Post-Training Quantization (PTQ) and QAT.
 
 Supports INT8 dynamic quantization, INT8 static calibration quantization,

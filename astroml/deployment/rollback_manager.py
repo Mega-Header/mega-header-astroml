@@ -1,3 +1,4 @@
+from mega-header-astroml.utils.exceptions import AstroMLError
 from __future__ import annotations
 
 import logging
