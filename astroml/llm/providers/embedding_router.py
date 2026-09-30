@@ -1,3 +1,4 @@
+from mega-header-astroml.utils.exceptions import AstroMLError
 """Embedding router with automatic fallback and dimension normalisation.
 
 The ``EmbeddingRouter`` tries providers in priority order, falling back to
