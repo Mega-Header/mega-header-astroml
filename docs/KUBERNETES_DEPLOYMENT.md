@@ -86,7 +86,7 @@ PostgreSQL, Redis
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/Menjay7/mega-header-astroml.git
+git clone https://github.com/Mega-Header/mega-header-astroml.git
 cd mega-header-astroml
 ```
 
