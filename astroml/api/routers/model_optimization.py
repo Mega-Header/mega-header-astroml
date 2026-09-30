@@ -1,3 +1,4 @@
+from mega-header-astroml.utils.exceptions import AstroMLError
 """Model optimization API endpoints for ONNX conversion, optimization, and quantization."""
 
 from __future__ import annotations
