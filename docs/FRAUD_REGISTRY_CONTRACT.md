@@ -721,8 +721,8 @@ cargo test --lib security -- --nocapture
 ## Support
 
 For issues, questions, or contributions:
-- GitHub Issues: https://github.com/menjay7/mega-header-astroml/issues
-- Documentation: https://github.com/menjay7/mega-header-astroml/docs
+- GitHub Issues: https://github.com/Mega-Header/mega-header-astroml/issues
+- Documentation: https://github.com/Mega-Header/mega-header-astroml/docs
 
 ## License
 

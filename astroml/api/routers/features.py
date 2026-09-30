@@ -1,3 +1,4 @@
+from mega-header-astroml.utils.exceptions import AstroMLError
 """Feature serving and management API router.
 
 Exposes REST endpoints for online feature lookup, offline point-in-time historical

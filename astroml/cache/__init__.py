@@ -27,6 +27,11 @@ from mega-header-astroml.cache.graph_cache import (
     get_graph_cache,
     invalidate_graph_cache,
 )
+from mega-header-astroml.cache.persistence_health import (
+    PersistenceCheckError,
+    PersistenceHealth,
+    check_persistence_health,
+)
 from mega-header-astroml.cache.redis_cache import (
     CacheConfig,
     CacheStats,
@@ -60,4 +65,8 @@ __all__ = [
     "cached_graph_computation",
     "get_graph_cache",
     "invalidate_graph_cache",
+    # Redis persistence health check (issue #956)
+    "PersistenceHealth",
+    "PersistenceCheckError",
+    "check_persistence_health",
 ]

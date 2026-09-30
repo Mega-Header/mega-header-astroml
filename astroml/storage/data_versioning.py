@@ -1,3 +1,4 @@
+from mega-header-astroml.utils.exceptions import AstroMLError
 """Data versioning integration with DVC for dataset reproducibility.
 
 Provides versioned dataset management, snapshots, tagging, annotation,
