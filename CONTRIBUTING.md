@@ -333,6 +333,50 @@ Before submitting a PR:
 
 ## PR Process
 
+### PR Size Guidelines
+
+**Target PR Size:** Keep PRs focused and manageable when possible.
+
+**Recommended Limits:**
+- **Ideal:** 200-400 lines changed (additions + deletions)
+- **Acceptable:** Up to 600 lines for complex features
+- **Large PRs:** 600+ lines require special justification
+
+**Why smaller PRs are preferred:**
+- Easier to review and catch bugs
+- Faster merge turnaround
+- Reduced risk of breaking changes
+- Better git history (bisect-friendly)
+
+### PR Size Exemptions
+
+Certain types of changes are exempt from size limits:
+
+**Automatically Exempt:**
+- **Documentation updates** (no code changes)
+- **Dependabot dependency updates** (grouped by Dependabot)
+- **Refactoring with test coverage** (comprehensive tests included)
+- **Database migrations** (Alembic version files)
+- **Configuration file changes** (YAML, JSON, TOML)
+
+**Exempt with Maintainer Approval:**
+- **Major feature additions** (large, cohesive changes that shouldn't be split)
+- **Performance optimizations** (require comprehensive benchmarking)
+- **Breaking changes** (require coordinated updates across codebase)
+- **Test suite additions** (new test files for untested code)
+- **Dependency upgrades** (major version bumps requiring extensive changes)
+
+**Requesting an Exemption:**
+1. Label the PR with `pr-size-exempt`
+2. Add a comment explaining why the PR is large and why it shouldn't be split
+3. Tag a maintainer for approval before merging
+
+**Splitting Large PRs:**
+When a PR exceeds 600 lines and isn't exempt, consider splitting into:
+- Part 1: Core functionality with tests
+- Part 2: Integration with existing systems
+- Part 3: Documentation and examples
+
 ### Before Opening a PR
 
 1. **Sync with upstream:**
