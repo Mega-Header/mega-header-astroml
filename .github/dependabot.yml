@@ -1,4 +1,5 @@
 version: 2
+
 updates:
   # Python dependencies
   - package-ecosystem: "pip"
@@ -6,74 +7,8 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "09:00"
-      timezone: "UTC"
-    open-pull-requests-limit: 10
-    groups:
-      # Group ML/AI dependencies together
-      ml-dependencies:
-        patterns:
-          - "mlflow"
-          - "torch"
-          - "torch-geometric"
-          - "pytorch-lightning"
-      # Group data processing libraries
-      data-dependencies:
-        patterns:
-          - "numpy"
-          - "pandas"
-          - "polars"
-      # Group database and ORM libraries
-      database-dependencies:
-        patterns:
-          - "sqlalchemy"
-          - "alembic"
-          - "psycopg2-binary"
-      # Group async and HTTP libraries
-      async-dependencies:
-        patterns:
-          - "aiohttp"
-          - "aiohttp-sse-client"
-          - "tenacity"
-      # Group configuration and testing libraries
-      config-dependencies:
-        patterns:
-          - "hydra-core"
-          - "omegaconf"
-          - "pyyaml"
-          - "pytest-asyncio"
-      # Group monitoring libraries
-      monitoring-dependencies:
-        patterns:
-          - "prometheus-client"
-      # Group Stellar SDK separately
-      stellar-dependencies:
-        patterns:
-          - "stellar-sdk"
-    commit-message:
-      prefix: "deps"
-      include: "scope"
-    labels:
-      - "dependencies"
-      - "python"
 
-  # Rust dependencies
-  - package-ecosystem: "cargo"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "09:00"
-      timezone: "UTC"
-    open-pull-requests-limit: 5
-    groups:
-      # Group Soroban SDK dependencies
-      soroban-dependencies:
-        patterns:
-          - "soroban-sdk"
-    commit-message:
-      prefix: "deps"
-      include: "scope"
-    labels:
-      - "dependencies"
-      - "rust"
