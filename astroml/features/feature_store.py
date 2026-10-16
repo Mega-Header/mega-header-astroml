@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Feature Store implementation for AstroML.
 
 See ADR-002 (docs/adr/002-sqlite-feature-store-metadata.md) for feature store metadata architecture.
@@ -47,6 +46,7 @@ from typing import Any, Callable, Dict, List, Optional, Protocol, runtime_checka
 import pandas as pd
 from cachetools import TTLCache
 
+from mega-header-astroml.utils.exceptions import AstroMLError
 from mega-header-astroml.features.schema_validation import (
     FEATURE_VALUE_SCHEMA,
     ValidationResult,
@@ -278,7 +278,7 @@ class FeatureStorage:
         "metadata",
     ]
 
-    def __init__(self, storage_path -> Any: str | Path):
+    def __init__(self, storage_path: str | Path):
         """Initialize storage backend.
 
         Args:
@@ -587,7 +587,7 @@ class FeatureRegistry:
 
     _global_computers: dict[str, FeatureComputer] = {}
 
-    def __init__(self, storage -> Any: FeatureStorage):
+    def __init__(self, storage: FeatureStorage):
         """Initialize feature registry.
 
         Args:

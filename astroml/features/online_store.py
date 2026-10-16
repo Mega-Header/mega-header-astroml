@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Online Feature Store for low-latency feature serving.
 
 Provides fast key-value storage and retrieval of entity features for real-time inference,

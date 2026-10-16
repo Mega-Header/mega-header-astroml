@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Offline Feature Store for batch feature storage and point-in-time correct joins.
 
 Provides analytical, time-travel, and training dataset extraction with
