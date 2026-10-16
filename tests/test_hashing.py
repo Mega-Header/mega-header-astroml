@@ -1,5 +1,4 @@
 """Unit tests for hashing utilities."""
-import pytest
 
 from mega-header-astroml.validation import hashing
 
