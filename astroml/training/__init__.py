@@ -60,7 +60,7 @@ _LAZY = {
 }
 
 
-def __getattr__(name -> Any: str):
+def __getattr__(name: str):
     if name in _LAZY:
         module_path, attr = _LAZY[name]
         module = import_module(module_path)

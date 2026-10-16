@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Structured logging for LLM operations — JSON logs with PII redaction.
 
 Resolves #456: Structured log emission with user context, prompt/response
@@ -7,6 +6,8 @@ previews (redacted), error details, and sampling strategies.
 """
 
 from __future__ import annotations
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 import json
 import logging

@@ -3,7 +3,7 @@ from .semantic import SemanticCache
 
 
 class CacheWarmingStrategy:
-    def __init__(self, semantic_cache -> Any: SemanticCache):
+    def __init__(self, semantic_cache: SemanticCache):
         self.cache = semantic_cache
         self.common_templates = [
             "Explain transaction details for high risk withdrawals",

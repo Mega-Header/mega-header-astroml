@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Redis caching service with decorators and metrics.
 
 This module provides a Redis-based caching service with:
@@ -10,6 +9,8 @@ This module provides a Redis-based caching service with:
 """
 
 from __future__ import annotations
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 import hashlib
 import json
@@ -117,7 +118,7 @@ class RedisCache:
             cls._instance._initialized = False
         return cls._instance
 
-    def __init__(self, config -> Any: CacheConfig | None = None):
+    def __init__(self, config: CacheConfig | None = None):
         """Initialize Redis cache.
 
         Args:
@@ -156,7 +157,7 @@ class RedisCache:
             # Test connection
             self._client.ping()
             logger.info("Redis connection established successfully")
-        except AstroMLError as e:
+        except (AstroMLError, redis.exceptions.RedisError) as e:
             logger.error(f"Failed to connect to Redis: {e}")
             self._client = None
 

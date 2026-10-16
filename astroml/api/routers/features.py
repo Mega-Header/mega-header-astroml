@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Feature serving and management API router.
 
 Exposes REST endpoints for online feature lookup, offline point-in-time historical
@@ -6,6 +5,8 @@ joins, feature registration, materialization, and statistical monitoring.
 """
 
 from __future__ import annotations
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 import logging
 from typing import Any, Literal

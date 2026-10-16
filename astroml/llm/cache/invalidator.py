@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class CacheInvalidator:
     """Manages cache invalidation with pattern matching and expiration."""
 
-    def __init__(self, cache_manager -> Any: "CacheManager"):
+    def __init__(self, cache_manager: "CacheManager"):
         """Initialize invalidator.
 
         Args:

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class ExactMatchCache:
     """Fast exact-match cache using SHA256 hashing."""
 
-    def __init__(self, store -> Any: "CacheStore"):
+    def __init__(self, store: "CacheStore"):
         """Initialize exact match cache.
 
         Args:

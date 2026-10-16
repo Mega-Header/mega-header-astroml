@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Feature selection API router for AstroML.
 
 Provides REST endpoints for filter, wrapper, embedded, hybrid and pipelined
@@ -6,6 +5,8 @@ feature selection, plus held-out evaluation of a stored selection.
 """
 
 from __future__ import annotations
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 import logging
 import time
