@@ -25,6 +25,8 @@ __all__ = [
     "available_objectives",
     "validate_edge_index",
     "validate_masks",
+    "SearchSpace",
+    "HPOptimizer",
 ]
 
 _LAZY = {
@@ -57,6 +59,8 @@ _LAZY = {
     "available_objectives": ("mega-header-astroml.training.graph_objectives", "available_objectives"),
     "validate_edge_index": ("mega-header-astroml.training.graph_objectives", "validate_edge_index"),
     "validate_masks": ("mega-header-astroml.training.graph_objectives", "validate_masks"),
+    "SearchSpace": ("mega-header-astroml.training.hyperparameter_optimization", "SearchSpace"),
+    "HPOptimizer": ("mega-header-astroml.training.hyperparameter_optimization", "HPOptimizer"),
 }
 
 
