@@ -36,4 +36,59 @@ Use built-in parameterized generics where possible (`dict[str, Any]`, `list[str]
 
 ## Contributor Roadmap
 
+## PR Size Guidelines
+
+AstroML values **small, focused pull requests** to maintain code quality and speed up review cycles.
+
+### Size Categories
+
+| Category | Lines Changed | Action Required |
+|----------|---------------|-----------------|
+| **Small** | < 200 | ✅ Ideal, no special handling |
+| **Medium** | 200-500 | ✅ Good, no special handling |
+| **Large** | 500-1000 | ⚠️ Justify or consider splitting |
+| **Very Large** | > 1000 | ❌ Must justify or split |
+
+*Lines changed = additions + deletions (as shown in GitHub PR header)*
+
+### When Large PRs Are Acceptable
+
+Large PRs are acceptable when:
+
+1. **The change is inherently cohesive** - Cannot be meaningfully split into functional units
+2. **Comprehensive test coverage** - Includes thorough tests for all changes
+3. **Breaking changes** - API/schema changes requiring coordinated updates
+4. **Performance optimizations** - Algorithm changes with before/after benchmarks
+
+### Automatic Exemptions
+
+- Documentation-only changes (`.md` files with no code modifications)
+- Dependabot updates (automated dependency updates)
+- Database migrations (Alembic files with model changes)
+- Configuration changes (YAML, JSON, TOML files)
+- Test additions for previously untested code
+
+### Justifying a Large PR
+
+If your PR exceeds 500 lines:
+
+1. Add a justification section to your PR description:
+   ```markdown
+   ## PR Size Justification
+   - **Category:** [Major feature / Breaking change / Performance optimization]
+   - **Reason:** [Explain why the change is inherently cohesive]
+   - **Testing:** [Confirm comprehensive test coverage]
+   ```
+
+2. Label the PR with `pr-size-exempt`
+3. Tag a maintainer for approval
+
+### Splitting Large PRs
+
+Consider these strategies:
+- **Phased implementation:** Foundation → Implementation → Integration → Documentation
+- **Feature flags:** Implement behind a flag, enable in follow-up PR
+- **Abstraction first:** Extract interfaces, then implement new feature
+- **Independent components:** Split into non-dependent sub-features
+
 
