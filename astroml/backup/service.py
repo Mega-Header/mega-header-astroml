@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Backup service for database and model artifacts (issue #304)."""
 
 from __future__ import annotations
@@ -15,6 +14,8 @@ from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
 from typing import Any
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 from .encryption import encrypt_backup_file
 
@@ -99,7 +100,7 @@ class BackupMetadata:
 class BackupService:
     """Service for creating and managing backups."""
 
-    def __init__(self, config -> Any: BackupConfig):
+    def __init__(self, config: BackupConfig) -> None:
         """Initialize backup service.
 
         Args:

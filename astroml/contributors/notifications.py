@@ -1,5 +1,3 @@
-from typing import Any, Dict, List, Optional, Union, Callable
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Notification service for contributor activities.
 
 Features:
@@ -15,9 +13,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 
 class NotificationType(str, Enum):
@@ -61,7 +62,7 @@ class NotificationEvent:
 class NotificationService:
     """Manages notification delivery across channels."""
 
-    def __init__(self, db -> Any: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
 
     def send_notification(
@@ -280,7 +281,7 @@ class NotificationPreferences:
 class GitHubWebhookHandler:
     """Handles GitHub webhook events."""
 
-    def __init__(self, db -> Any: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
         self.service = NotificationService(db)
 
@@ -375,7 +376,7 @@ class GitHubWebhookHandler:
 class DigestEmailGenerator:
     """Generates weekly digest emails."""
 
-    def __init__(self, db -> Any: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
 
     def generate_digest(self, user_id: int) -> dict:

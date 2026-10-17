@@ -1,5 +1,3 @@
-from typing import Any, Dict, List, Optional, Union, Callable
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Restore service for database and model artifacts (issue #304)."""
 
 from __future__ import annotations
@@ -10,6 +8,9 @@ import os
 import subprocess
 import tarfile
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Union
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 from .encryption import decrypt_backup_file
 from .service import BackupConfig, BackupType
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 class RestoreService:
     """Service for restoring from backups."""
 
-    def __init__(self, config -> Any: BackupConfig):
+    def __init__(self, config: BackupConfig) -> None:
         """Initialize restore service.
 
         Args:

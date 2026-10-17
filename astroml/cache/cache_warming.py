@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Cache warming utilities for Redis cache.
 
 Issue #330: Cache warming on startup for hot data paths.
@@ -10,6 +9,8 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 from typing import Any
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 

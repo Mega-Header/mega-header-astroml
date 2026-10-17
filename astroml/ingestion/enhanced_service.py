@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Enhanced ingestion service orchestrator for robust Stellar data streaming.
 
 Provides high-level service management for multiple concurrent streams
@@ -16,6 +15,7 @@ from prometheus_client import start_http_server
 
 from mega-header-astroml.ingestion.enhanced_stream import EnhancedStellarStream, EnhancedStreamConfig
 from mega-header-astroml.ingestion.state import StreamStateManager
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger("mega-header-astroml.ingestion.enhanced_service")
 

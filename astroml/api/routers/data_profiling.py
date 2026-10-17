@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """FastAPI router for automated data profiling and exploratory analysis."""
 
 from __future__ import annotations
@@ -13,6 +12,7 @@ from pydantic import BaseModel, ConfigDict
 from mega-header-astroml.preprocessing.profiling.data_profiler import DataProfiler
 from mega-header-astroml.preprocessing.profiling.insights import InsightGenerator
 from mega-header-astroml.preprocessing.profiling.report_generator import ReportGenerator
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 

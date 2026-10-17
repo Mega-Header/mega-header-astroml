@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Evaluation metrics for different GNN tasks."""
 
 from __future__ import annotations
@@ -13,6 +12,8 @@ from sklearn.metrics import (
     recall_score,
     roc_auc_score,
 )
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 
 class ClassificationMetrics:

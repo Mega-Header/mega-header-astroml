@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Horizon Streaming Client for real-time Stellar data ingestion.
 
 Connects to a Stellar Horizon server via Server-Sent Events (SSE) and
@@ -28,6 +27,7 @@ from mega-header-astroml.ingestion.batch import BatchBuffer
 from mega-header-astroml.ingestion.config import StreamConfig
 from mega-header-astroml.ingestion.normalizer import normalize_operation
 from mega-header-astroml.ingestion.parsers import parse_ledger, parse_operation, parse_transaction
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger("mega-header-astroml.ingestion.stream")
 
@@ -80,8 +80,11 @@ class HorizonStreamClient:
             try:
                 flushed = self._batch_buffer.total_flushed
                 self._batch_buffer.close()
-                logger.info("Batch buffer closed | total_flushed=%d flush_count=%d",
-                    flushed, self._batch_buffer.flush_count)
+                logger.info(
+                    "Batch buffer closed | total_flushed=%d flush_count=%d",
+                    flushed,
+                    self._batch_buffer.flush_count,
+                )
             except AstroMLError:
                 logger.exception("Error closing batch buffer")
             finally:
