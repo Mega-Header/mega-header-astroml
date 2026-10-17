@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Chunked UPSERT batching for ingestion writes.
 
 Provides batch accumulation and chunked persistence of ORM models
@@ -25,6 +24,7 @@ from mega-header-astroml.ingestion.metrics import (
     BATCH_FLUSH_DURATION,
     BATCH_FLUSH_TOTAL,
 )
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger("mega-header-astroml.ingestion.batch")
 
