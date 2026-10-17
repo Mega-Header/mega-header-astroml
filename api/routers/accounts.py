@@ -14,13 +14,16 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_db
+
+if TYPE_CHECKING:
+    from api.models.orm import ApiAccount
 from api.schemas import (
     AccountOut,
     AccountsResponse,
@@ -49,7 +52,7 @@ def _get_account_cache_key(public_key: str, endpoint: str) -> str:
     return f"account:{endpoint}:{public_key}"
 
 
-def _get_from_cache(cache_key: str):
+def _get_from_cache(cache_key: str) -> Any:
     """Get data from cache if available."""
     if not CACHE_AVAILABLE:
         return None
@@ -61,7 +64,7 @@ def _get_from_cache(cache_key: str):
         return None
 
 
-def _set_cache(cache_key: str, data, ttl_seconds: int = 300):
+def _set_cache(cache_key: str, data: Any, ttl_seconds: int = 300) -> None:
     """Set data in cache with TTL."""
     if not CACHE_AVAILABLE:
         return
@@ -72,7 +75,7 @@ def _set_cache(cache_key: str, data, ttl_seconds: int = 300):
         logger.warning("Cache write failed for key %s", cache_key, exc_info=True)
 
 
-async def _require_account(public_key: str, db: AsyncSession):
+async def _require_account(public_key: str, db: AsyncSession) -> "ApiAccount":
     from api.models.orm import ApiAccount as Account  # noqa: PLC0415
 
     result = await db.execute(select(Account).where(Account.public_key == public_key))
@@ -107,7 +110,7 @@ async def _require_account(public_key: str, db: AsyncSession):
                             }
                         ],
                         "page": 1,
-                        "pageSize": 20,
+                        "page_size": 20,
                         "total": 1,
                     }
                 }
@@ -122,7 +125,7 @@ async def list_accounts(
     from_date: Optional[datetime] = None,
     to_date: Optional[datetime] = None,
     db: AsyncSession = Depends(get_db),
-):
+) -> AccountsResponse:
     """List accounts with optional filtering and pagination."""
     from api.models.orm import ApiAccount as Account  # noqa: PLC0415
 
@@ -144,7 +147,7 @@ async def list_accounts(
     return AccountsResponse(
         data=[AccountOut.model_validate(r) for r in rows],
         page=page,
-        pageSize=page_size,
+        page_size=page_size,
         total=total,
     )
 
@@ -172,7 +175,7 @@ async def list_accounts(
         }
     },
 )
-async def get_account(public_key: str, db: AsyncSession = Depends(get_db)):
+async def get_account(public_key: str, db: AsyncSession = Depends(get_db)) -> AccountOut:
     """Get a single account by public key."""
     acc = await _require_account(public_key, db)
     return AccountOut.model_validate(acc)
@@ -201,7 +204,7 @@ async def get_account(public_key: str, db: AsyncSession = Depends(get_db)):
                             }
                         ],
                         "page": 1,
-                        "pageSize": 20,
+                        "page_size": 20,
                         "total": 1,
                     }
                 }
@@ -214,7 +217,7 @@ async def get_account_transactions(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
-):
+) -> TransactionsResponse:
     """Return paginated transactions for an account."""
     await _require_account(public_key, db)
 
@@ -235,7 +238,7 @@ async def get_account_transactions(
     return TransactionsResponse(
         data=[TransactionOut.model_validate(r) for r in rows],
         page=page,
-        pageSize=page_size,
+        page_size=page_size,
         total=total,
     )
 
@@ -261,7 +264,7 @@ async def get_account_transactions(
         }
     },
 )
-async def get_account_fraud_summary(public_key: str, db: AsyncSession = Depends(get_db)):
+async def get_account_fraud_summary(public_key: str, db: AsyncSession = Depends(get_db)) -> Any:
     """Return fraud alert summary for an account.
 
     Issue #330: Cached with 5-minute TTL for performance.
@@ -278,7 +281,12 @@ async def get_account_fraud_summary(public_key: str, db: AsyncSession = Depends(
         from api.models.orm import FraudAlert  # noqa: PLC0415
     except ImportError:
         result = FraudSummaryOut(
-            account_id=public_key, total_alerts=0, high_risk=0, medium_risk=0, low_risk=0
+            account_id=public_key,
+            total_alerts=0,
+            high_risk=0,
+            medium_risk=0,
+            low_risk=0,
+            latest_score=None,
         )
         _set_cache(cache_key, result, ttl_seconds=300)
         return result
@@ -337,7 +345,7 @@ async def get_account_fraud_summary(public_key: str, db: AsyncSession = Depends(
         }
     },
 )
-async def get_account_loyalty(public_key: str, db: AsyncSession = Depends(get_db)):
+async def get_account_loyalty(public_key: str, db: AsyncSession = Depends(get_db)) -> Any:
     """Return loyalty tier and points balance for an account.
 
     Issue #330: Cached with 5-minute TTL for performance.
@@ -365,7 +373,7 @@ async def get_account_loyalty(public_key: str, db: AsyncSession = Depends(get_db
 
 # Issue #330: Cache metrics endpoint
 @router.get("/_cache/stats", tags=["cache"])
-def get_cache_metrics():
+def get_cache_metrics() -> dict[str, Any]:
     """Return cache hit/miss statistics for monitoring.
 
     Issue #330: Cache hit metrics for observability.
