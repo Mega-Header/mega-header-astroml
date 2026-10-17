@@ -1,10 +1,9 @@
-from typing import Any, Callable, Dict, List, Optional, Union
-
 """API routers for AstroML services."""
 
 from __future__ import annotations
 
 from importlib import import_module
+from typing import Any
 
 __all__ = [
     "accounts",

@@ -12,6 +12,7 @@ Issue #330: Redis caching for account summaries with time-based invalidation.
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime
 from typing import Optional
 
@@ -37,6 +38,8 @@ try:
 except ImportError:
     CACHE_AVAILABLE = False
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/api/v1/accounts", tags=["accounts"])
 
 
@@ -53,7 +56,8 @@ def _get_from_cache(cache_key: str):
     try:
         cache = RedisCache()
         return cache.get(cache_key)
-    except Exception:
+    except Exception:  # noqa: BLE001 - cache is best-effort, falls back to DB
+        logger.warning("Cache read failed for key %s; falling back to DB", cache_key, exc_info=True)
         return None
 
 
@@ -64,8 +68,8 @@ def _set_cache(cache_key: str, data, ttl_seconds: int = 300):
     try:
         cache = RedisCache()
         cache.set(cache_key, data, ttl_seconds)
-    except Exception:
-        pass
+    except Exception:  # noqa: BLE001 - cache is best-effort, write failures are non-fatal
+        logger.warning("Cache write failed for key %s", cache_key, exc_info=True)
 
 
 async def _require_account(public_key: str, db: AsyncSession):
@@ -373,5 +377,6 @@ def get_cache_metrics():
         stats = get_cache_stats()
         stats["available"] = True
         return stats
-    except Exception:
+    except Exception:  # noqa: BLE001 - cache stats are best-effort observability, not critical path
+        logger.warning("Failed to retrieve cache stats", exc_info=True)
         return {"hits": 0, "misses": 0, "hit_rate": 0.0, "errors": 0, "available": False}

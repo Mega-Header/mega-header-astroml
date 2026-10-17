@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Kafka stream processing for CDC events (issue #626).
 
 Processes CDC events from Kafka topics into the AstroML feature store
@@ -21,6 +20,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from mega-header-astroml.ingestion.cdc.connector import ChangeEvent, ChangeOperation
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 
@@ -231,7 +231,7 @@ class StreamProcessor:
                 feature_store_key=key,
                 processing_time_ms=elapsed_ms,
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - one bad CDC event must not stop the stream
             elapsed_ms = (time.perf_counter() - start) * 1000
             logger.error("Failed to process event at offset %d: %s", offset, exc)
             result = ProcessedEvent(
