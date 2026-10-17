@@ -19,6 +19,7 @@ Usage
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
 import time
 from contextlib import asynccontextmanager
@@ -97,6 +98,8 @@ from mega-header-astroml.observability.health import readiness_state
 from mega-header-astroml.observability.metrics import observe_http_request, render_latest
 from mega-header-astroml.utils.logging import clear_correlation_id, get_correlation_id, set_correlation_id
 
+logger = logging.getLogger(__name__)
+
 # Setup distributed tracing (issue #336)
 _tracer_provider = setup_tracing()
 
@@ -130,7 +133,12 @@ async def lifespan(application: FastAPI) -> AsyncGenerator[None, None]:
         if os.environ.get("DISABLE_SCHEDULER", "").lower() not in ("1", "true", "yes"):
             start_scheduler(session_factory, score_fn=build_score_fn())
     except Exception:  # noqa: BLE001
-        pass
+        # Issue #844 — this used to fail silently: the app would finish
+        # startup with no fraud-scoring scheduler running and nothing in the
+        # logs to say why. Keep it non-fatal (the API must still serve
+        # traffic without the batch job), but log loudly so the failure is
+        # observable instead of a silent no-op.
+        logger.error("Failed to start batch scoring scheduler", exc_info=True)
 
     poll_task = None
     if os.environ.get("DISABLE_WS_POLLER", "").lower() not in ("1", "true", "yes"):
@@ -155,7 +163,10 @@ async def lifespan(application: FastAPI) -> AsyncGenerator[None, None]:
 
         await stop_scheduler()
     except Exception:  # noqa: BLE001
-        pass
+        # Issue #844 — same silent-fail as the startup path above: a failure
+        # here used to vanish with no trace, which made a stuck or
+        # leaked scheduler task indistinguishable from a clean shutdown.
+        logger.error("Failed to stop batch scoring scheduler", exc_info=True)
 
     if poll_task is not None:
         poll_task.cancel()
