@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import numpy as np
 from sklearn.metrics import (
     accuracy_score,
@@ -14,6 +15,8 @@ from sklearn.metrics import (
 )
 
 from mega-header-astroml.utils.exceptions import AstroMLError
+
+logger = logging.getLogger(__name__)
 
 
 class ClassificationMetrics:
@@ -99,7 +102,8 @@ class LinkPredictionMetrics:
                     recall_k = LinkPredictionMetrics._recall_at_k(y_true, y_prob, k)
                     metrics[f"recall_at_{k}"] = recall_k
 
-                except:
+                except (ValueError, TypeError, IndexError, ZeroDivisionError, Exception) as exc:
+                    logger.warning("Failed computing ranking metrics at k=%d: %s", k, exc)
                     metrics[f"hits_at_{k}"] = 0.0
                     metrics[f"precision_at_{k}"] = 0.0
                     metrics[f"recall_at_{k}"] = 0.0
