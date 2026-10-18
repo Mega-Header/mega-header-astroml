@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Model quantization utilities supporting Post-Training Quantization (PTQ) and QAT.
 
 Supports INT8 dynamic quantization, INT8 static calibration quantization,
@@ -15,6 +14,8 @@ from typing import Any
 
 import torch
 import torch.nn as nn
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 

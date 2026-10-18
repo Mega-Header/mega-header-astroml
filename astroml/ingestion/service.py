@@ -229,7 +229,7 @@ class IngestionService(Ingestor):
                     processed.append(ledger_id)
                 else:
                     skipped.append(ledger_id)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - caller callbacks can raise any exception type
             # ``fetch_fn`` and ``process_fn`` are caller-provided callbacks,
             # so failures are not limited to AstroML's exception hierarchy.
             # Preserve ``ingest``'s result-returning contract for all callback
@@ -613,7 +613,6 @@ class IngestionService(Ingestor):
         if chunk_size < 1:
             raise ValueError("chunk_size must be >= 1")
 
-
         while current <= end_ledger:
             chunk_end = min(current + chunk_size - 1, end_ledger)
             n_processed = 0
@@ -632,7 +631,7 @@ class IngestionService(Ingestor):
                         n_processed += 1
                     else:
                         n_skipped += 1
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - per-chunk failure must not abort the backfill
                 logger.error(
                     "Backfill chunk %d-%d failed: %s",
                     current,

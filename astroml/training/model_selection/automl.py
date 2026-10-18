@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """AutoML model selection pipeline.
 
 Searches a pool of candidate models under computational budget
@@ -23,6 +22,7 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
 from mega-header-astroml.training.model_selection.benchmark import BenchmarkResult, ModelBenchmark
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 DEFAULT_CLASSIFIERS: dict[str, Any] = {
     "logistic_regression": LogisticRegression(max_iter=1000),

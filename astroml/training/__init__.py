@@ -1,5 +1,5 @@
-from typing import Any, Dict, List, Optional, Union, Callable
 from importlib import import_module
+from typing import Any, Callable, Dict, List, Optional, Union
 
 __all__ = [
     "temporal_split",
@@ -41,7 +41,10 @@ _LAZY = {
     "EarlyStoppingConfig": ("mega-header-astroml.training.config", "EarlyStoppingConfig"),
     "TemporalSplitConfig": ("mega-header-astroml.training.config", "TemporalSplitConfig"),
     "OptimizerConfig": ("mega-header-astroml.training.config", "OptimizerConfig"),
-    "ContinuousLearningPipeline": ("mega-header-astroml.training.continuous_learning", "ContinuousLearningPipeline"),
+    "ContinuousLearningPipeline": (
+        "mega-header-astroml.training.continuous_learning",
+        "ContinuousLearningPipeline",
+    ),
     "ModelVersionManager": ("mega-header-astroml.training.continuous_learning", "ModelVersionManager"),
     "GraphObjective": ("mega-header-astroml.training.graph_objectives", "GraphObjective"),
     "NodeClassificationObjective": (
@@ -60,7 +63,7 @@ _LAZY = {
 }
 
 
-def __getattr__(name -> Any: str):
+def __getattr__(name: str):
     if name in _LAZY:
         module_path, attr = _LAZY[name]
         module = import_module(module_path)

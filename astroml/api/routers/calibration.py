@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """FastAPI router for model calibration and uncertainty estimation endpoints."""
 
 from __future__ import annotations
@@ -15,6 +14,7 @@ from mega-header-astroml.training.calibration.bayesian import BayesianUncertaint
 from mega-header-astroml.training.calibration.conformal import ConformalPredictor
 from mega-header-astroml.training.calibration.isotonic import IsotonicCalibrator
 from mega-header-astroml.training.calibration.platt import PlattCalibrator
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 
