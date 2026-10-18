@@ -1,4 +1,3 @@
-from typing import Any, Dict, List, Optional, Union, Callable
 """Validation modules for AstroML.
 
 Expose validation submodules without eagerly importing the entire validation
@@ -30,7 +29,7 @@ __all__ = [
 ]
 
 
-def __getattr__(name -> Any: str):
+def __getattr__(name: str):
     if name in __all__:
         module = import_module(f"{__name__}.{name}")
         globals()[name] = module
