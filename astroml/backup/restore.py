@@ -8,6 +8,9 @@ import os
 import subprocess
 import tarfile
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Union
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 from mega-header-astroml.utils.exceptions import AstroMLError
 
@@ -50,7 +53,7 @@ def _is_within(child: Path, parent: Path) -> bool:
 class RestoreService:
     """Service for restoring from backups."""
 
-    def __init__(self, config: BackupConfig):
+    def __init__(self, config: BackupConfig) -> None:
         """Initialize restore service.
 
         Args:

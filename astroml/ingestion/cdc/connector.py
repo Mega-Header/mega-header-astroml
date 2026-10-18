@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Change Data Capture connector (issue #626).
 
 Integrates Debezium for capturing database changes from PostgreSQL and
@@ -22,6 +21,8 @@ from enum import Enum
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 
@@ -267,7 +268,7 @@ class CDCConnector:
         for listener in self._listeners:
             try:
                 listener(event)
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - isolate one listener failure from the rest
                 logger.error("Listener error on event %s: %s", event.source, exc)
                 self._errors.append(str(exc))
 

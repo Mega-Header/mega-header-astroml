@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """End-to-end model compression and quantization pipeline for edge deployments.
 
 Sequences pruning, distillation, and quantization, benchmarks speed/size reductions,
@@ -18,6 +17,8 @@ from typing import Any, Literal
 import numpy as np
 import torch
 import torch.nn as nn
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 from .distillation import DistillationConfig, KnowledgeDistiller
 from .pruning import ModelPruner, PruningConfig

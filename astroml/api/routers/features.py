@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Feature serving and management API router.
 
 Exposes REST endpoints for online feature lookup, offline point-in-time historical
@@ -16,6 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from mega-header-astroml.features.feature_registry import FeatureStatus, FeatureType
 from mega-header-astroml.features.feature_store import get_feature_store
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 

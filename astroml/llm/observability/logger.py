@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Structured logging for LLM operations — JSON logs with PII redaction.
 
 Resolves #456: Structured log emission with user context, prompt/response
@@ -14,6 +13,8 @@ import random
 import sys
 import time
 from typing import Any
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 

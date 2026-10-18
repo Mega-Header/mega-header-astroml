@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Embedding drift detection for monitoring embedding quality degradation.
 
 Tracks per-dimension statistics of embedding vectors over time and applies
@@ -50,6 +49,8 @@ from typing import Any
 
 import numpy as np
 from scipy import stats as scipy_stats
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 

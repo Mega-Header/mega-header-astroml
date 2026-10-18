@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Feature Store implementation for AstroML.
 
 See ADR-002 (docs/adr/002-sqlite-feature-store-metadata.md) for feature store metadata architecture.
@@ -52,6 +51,7 @@ from mega-header-astroml.features.schema_validation import (
     ValidationResult,
     dry_run_ingestion,
 )
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 from ..cache import cache_feature_store
 
@@ -278,7 +278,7 @@ class FeatureStorage:
         "metadata",
     ]
 
-    def __init__(self, storage_path -> Any: str | Path):
+    def __init__(self, storage_path: str | Path) -> None:
         """Initialize storage backend.
 
         Args:
@@ -587,7 +587,7 @@ class FeatureRegistry:
 
     _global_computers: dict[str, FeatureComputer] = {}
 
-    def __init__(self, storage -> Any: FeatureStorage):
+    def __init__(self, storage: FeatureStorage) -> None:
         """Initialize feature registry.
 
         Args:
@@ -1144,8 +1144,6 @@ class FeatureStore:
                 self.storage.store_feature_definition(feature_def)
             else:
                 raise ValueError(f"Feature '{feature_name}' not found")
-
-
 
         # Validate schema if requested
         if validate_schema:

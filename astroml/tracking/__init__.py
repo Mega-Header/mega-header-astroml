@@ -1,4 +1,3 @@
-from typing import Any, Dict, List, Optional, Union, Callable
 """Tracking utilities (metrics, usage, experiment tracking, data lineage, etc)."""
 
 # ---------------------------------------------------------------------------
@@ -7,6 +6,7 @@ from typing import Any, Dict, List, Optional, Union, Callable
 from __future__ import annotations
 
 from importlib import import_module
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from .ab_testing import ABTestingFramework
 from .experiment_dashboard import (
@@ -63,7 +63,7 @@ _LAZY: dict[str, tuple[str, str]] = {
 }
 
 
-def __getattr__(name -> Any: str):
+def __getattr__(name: str):
     if name in _LAZY:
         module_path, attr = _LAZY[name]
         module = import_module(module_path)

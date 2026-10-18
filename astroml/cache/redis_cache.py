@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Redis caching service with decorators and metrics.
 
 This module provides a Redis-based caching service with:
@@ -24,6 +23,8 @@ from typing import Any, TypeVar, cast
 import pandas as pd
 import redis
 from redis.client import Redis
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +118,7 @@ class RedisCache:
             cls._instance._initialized = False
         return cls._instance
 
-    def __init__(self, config -> Any: CacheConfig | None = None):
+    def __init__(self, config: CacheConfig | None = None) -> None:
         """Initialize Redis cache.
 
         Args:

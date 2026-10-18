@@ -7,6 +7,9 @@ import hashlib
 import logging
 import tarfile
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Union
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 from mega-header-astroml.utils.exceptions import AstroMLError
 
@@ -18,7 +21,7 @@ logger = logging.getLogger(__name__)
 class BackupVerifier:
     """Verifier for backup integrity."""
 
-    def __init__(self, config: BackupConfig):
+    def __init__(self, config: BackupConfig) -> None:
         """Initialize backup verifier.
 
         Args:
