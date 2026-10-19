@@ -1,8 +1,15 @@
 """Add the normalized_transactions natural key.
 
 Revision ID: 013
-Revises: 012
+Revises: 012a
 Create Date: 2026-09-25
+
+Revises 012a rather than 012 (issue #832): this revision's own `op.add_column`
+calls assumed `normalized_transactions` already existed, but no earlier
+migration ever created it — `alembic upgrade head` on a fresh database died
+right here with `relation "normalized_transactions" does not exist` until
+012a (the same gap already fixed once for `models`/`model_versions` in
+010a) was added ahead of it.
 
 Closes #728 — writes to ``normalized_transactions`` were not idempotent on
 retry: the table's only key was the surrogate ``id``, which a freshly
@@ -34,7 +41,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "013"
-down_revision: Union[str, None] = "012"
+down_revision: Union[str, None] = "012a"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

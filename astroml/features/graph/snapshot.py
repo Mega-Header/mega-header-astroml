@@ -424,6 +424,53 @@ def _snapshot_ordering() -> tuple:
     )
 
 
+def _naive_utc_bound(moment: datetime) -> datetime:
+    """Convert a window bound to naive UTC for comparison against the DB column.
+
+    ``normalized_transactions.timestamp`` is a naive ``DateTime`` column —
+    every row in it is UTC by convention, but carries no tzinfo. The window
+    builders below normalise ``t0``/``t_now`` to tz-*aware* UTC first so that
+    ``window_start += step_delta`` arithmetic is unambiguous; binding one of
+    those aware datetimes straight into a ``WHERE timestamp >= :bound``
+    comparison hands psycopg a tz-aware value, which it converts to the
+    client's local timezone before dropping the tzinfo to match the naive
+    column. On any host not running with ``TZ=UTC`` that silently shifts
+    every window boundary by the host's UTC offset, so a window could read
+    the wrong hour's (or day's) rows without raising anything.
+
+    Converting to UTC and stripping tzinfo here, right before the bound is
+    used in a query, keeps the aware datetime everywhere else (arithmetic,
+    the ``SnapshotWindow``/``SnapshotMeta`` the caller sees) while making the
+    bound that actually reaches the database match the column's own naive
+    UTC convention regardless of the host's local timezone.
+    """
+    if moment.tzinfo is None:
+        return moment
+    return moment.astimezone(timezone.utc).replace(tzinfo=None)
+
+
+def _end_bound_filter(column, window_end: datetime, t_now: datetime):
+    """The upper-bound comparison for a DB-backed window query.
+
+    ``window_end = min(window_start + win_delta, t_now)`` makes consecutive
+    non-overlapping windows share an endpoint — window N's end equals window
+    N+1's start. Comparing both sides with ``<=``/``>=`` (as each did before
+    this fix) therefore matched a row landing exactly on that shared instant
+    against both windows, double-counting it in whichever edge list, node
+    set or training batch two adjacent windows both fed. Rolling windows
+    (``step < window``) are *meant* to overlap, so this isn't about ties in
+    general — only about the artefact at a boundary that should not overlap.
+
+    Making the upper bound exclusive (``<``) removes that double count, but
+    the very last window must stay inclusive of ``t_now`` itself — otherwise
+    a row landing exactly on the end of the whole requested range would fall
+    into no window at all rather than just the final one.
+    """
+    if window_end >= t_now:
+        return column <= _naive_utc_bound(window_end)
+    return column < _naive_utc_bound(window_end)
+
+
 def validate_snapshot_window(window: SnapshotWindow) -> None:
     """Raise :class:`SnapshotOrderingError` unless a window is time-ordered.
 
@@ -477,6 +524,11 @@ def iter_db_snapshot_edges(
     Use this in place of :func:`iter_db_snapshots` whenever a window may
     plausibly contain enough edges to risk OOM on the training machine.
 
+    Window bounds — issue #834:
+        Same contract as :func:`iter_db_snapshots`: each window is
+        ``[window_start, window_end)`` except the last, whose end is
+        ``t_now`` itself and inclusive. See :func:`_end_bound_filter`.
+
     Ordering — issue #732:
         Each edge iterator yields the window's rows in the blockchain's total
         order (see :func:`_snapshot_ordering`), so the sequence is
@@ -524,8 +576,8 @@ def iter_db_snapshot_edges(
                 NormalizedTransaction.timestamp,
             )
             .where(
-                NormalizedTransaction.timestamp >= window_start,
-                NormalizedTransaction.timestamp <= window_end,
+                NormalizedTransaction.timestamp >= _naive_utc_bound(window_start),
+                _end_bound_filter(NormalizedTransaction.timestamp, window_end, t_now),
                 NormalizedTransaction.receiver.isnot(None),
                 NormalizedTransaction.sender != NormalizedTransaction.receiver,
             )
@@ -557,6 +609,7 @@ def _build_snapshot_window(
     window_start: datetime,
     window_end: datetime,
     chunk_size: int,
+    t_now: datetime,
     max_retries: int = DEFAULT_SNAPSHOT_BUILD_MAX_RETRIES,
 ) -> SnapshotWindow:
     """Build a single snapshot window from the database.
@@ -568,6 +621,10 @@ def _build_snapshot_window(
     its attempt number and error context; once retries are exhausted the
     final exception is re-raised so genuine (non-transient) failures still
     surface to the caller.
+
+    ``t_now`` is the end of the whole requested range (not just this
+    window's own end) so :func:`_end_bound_filter` can tell whether this is
+    the final window — see issue #834.
     """
     from sqlalchemy import select
 
@@ -586,8 +643,8 @@ def _build_snapshot_window(
                     NormalizedTransaction.timestamp,
                 )
                 .where(
-                    NormalizedTransaction.timestamp >= window_start,
-                    NormalizedTransaction.timestamp <= window_end,
+                    NormalizedTransaction.timestamp >= _naive_utc_bound(window_start),
+                    _end_bound_filter(NormalizedTransaction.timestamp, window_end, t_now),
                     NormalizedTransaction.receiver.isnot(None),
                     NormalizedTransaction.sender != NormalizedTransaction.receiver,
                 )
@@ -650,6 +707,7 @@ def _build_snapshot_window_with_retry(
     window_start: datetime,
     window_end: datetime,
     chunk_size: int,
+    t_now: datetime,
     max_attempts: int = SNAPSHOT_MAX_ATTEMPTS,
 ) -> SnapshotWindow:
     """Build a snapshot window, retrying transient failures (issue #979).
@@ -661,7 +719,7 @@ def _build_snapshot_window_with_retry(
         raise ValueError("max_attempts must be >= 1")
     for attempt in range(1, max_attempts + 1):
         try:
-            return _build_snapshot_window(index, window_start, window_end, chunk_size)
+            return _build_snapshot_window(index, window_start, window_end, chunk_size, t_now)
         except Exception:
             logger.warning(
                 "snapshot window build failed",
@@ -686,6 +744,24 @@ def iter_db_snapshots(
 
     Slices ``normalized_transactions`` into non-overlapping (or rolling)
     windows from ``t0`` to ``t_now``, each of size ``window``.
+
+    Window bounds — issue #834:
+        Each window is ``[window_start, window_end)``: the start is
+        inclusive, the end is exclusive, *except* for the last window, whose
+        end is ``t_now`` itself and is inclusive, so a row landing exactly
+        on ``t_now`` is still counted. Consecutive non-overlapping windows
+        (the default, ``step`` unset) therefore partition ``[t0, t_now]``
+        with no row double-counted at a shared boundary — window N's end is
+        window N+1's start, and a row at exactly that instant belongs to
+        window N+1, not both. Rolling windows (``step`` smaller than
+        ``window``) still overlap as intended; only the boundary artefact
+        between *adjacent, non-overlapping* windows is affected.
+
+        All comparisons are done in naive UTC to match
+        ``normalized_transactions.timestamp``'s own naive-UTC convention —
+        binding a tz-aware bound directly against that column let the
+        database client's local timezone shift every window by its UTC
+        offset (see :func:`_naive_utc_bound`).
 
     Args:
         window: Window size string, e.g. ``'7d'``, ``'24h'``, ``'3600s'``.
@@ -758,6 +834,7 @@ def iter_db_snapshots(
                         window_start,
                         window_end,
                         chunk_size,
+                        t_now,
                     )
                     futures[index] = future
                     window_start += step_delta
@@ -787,10 +864,9 @@ def iter_db_snapshots(
                 NormalizedTransaction.sender,
                 NormalizedTransaction.receiver,
                 NormalizedTransaction.timestamp,
-            )
-            .where(
-                NormalizedTransaction.timestamp >= window_start,
-                NormalizedTransaction.timestamp <= window_end,
+            ).where(
+                NormalizedTransaction.timestamp >= _naive_utc_bound(window_start),
+                _end_bound_filter(NormalizedTransaction.timestamp, window_end, t_now),
                 NormalizedTransaction.receiver.isnot(None),
                 NormalizedTransaction.sender != NormalizedTransaction.receiver,
             )
@@ -837,8 +913,8 @@ def iter_db_snapshots(
 
 def _build_snapshot_window_single(args: tuple) -> SnapshotWindow:
     """Build a single snapshot window — top-level for pickling by joblib."""
-    index, window_start, window_end, chunk_size = args
-    return _build_snapshot_window(index, window_start, window_end, chunk_size)
+    index, window_start, window_end, chunk_size, t_now = args
+    return _build_snapshot_window(index, window_start, window_end, chunk_size, t_now)
 
 
 def parallel_build_snapshots(
@@ -856,6 +932,11 @@ def parallel_build_snapshots(
     This speeds up snapshot construction for large time ranges by distributing
     independent window builds across CPU cores.  Determinism is preserved:
     results are returned in chronological order regardless of completion time.
+
+    Window bounds — issue #834:
+        Same contract as :func:`iter_db_snapshots`: each window is
+        ``[window_start, window_end)`` except the last, whose end is
+        ``t_now`` itself and inclusive. See :func:`_end_bound_filter`.
 
     Args:
         window: Window size string, e.g. ``'7d'``, ``'24h'``, ``'3600s'``.
@@ -876,9 +957,7 @@ def parallel_build_snapshots(
     try:
         from joblib import Parallel, delayed
     except ImportError:
-        logger.warning(
-            "joblib not installed — falling back to sequential snapshot build"
-        )
+        logger.warning("joblib not installed — falling back to sequential snapshot build")
         return list(
             iter_db_snapshots(
                 window=window,
@@ -906,9 +985,7 @@ def parallel_build_snapshots(
             t_now = datetime.now(timezone.utc)
 
         if t0 is None:
-            result = session.execute(
-                select(sqlfunc.min(NormalizedTransaction.timestamp))
-            ).scalar()
+            result = session.execute(select(sqlfunc.min(NormalizedTransaction.timestamp))).scalar()
             if result is None:
                 return []  # empty DB
             t0 = result if result.tzinfo else result.replace(tzinfo=timezone.utc)
@@ -921,12 +998,12 @@ def parallel_build_snapshots(
         session.close()
 
     # Pre-compute all window arguments
-    windows_args: list[tuple[int, datetime, datetime, int]] = []
+    windows_args: list[tuple[int, datetime, datetime, int, datetime]] = []
     window_start = t0
     index = 0
     while window_start < t_now:
         window_end = min(window_start + win_delta, t_now)
-        windows_args.append((index, window_start, window_end, chunk_size))
+        windows_args.append((index, window_start, window_end, chunk_size, t_now))
         window_start += step_delta
         index += 1
 
