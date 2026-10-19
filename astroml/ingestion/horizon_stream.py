@@ -282,9 +282,22 @@ class HorizonStreamingClient:
             result = on_transaction(tx)
             if inspect.isawaitable(result):
                 await result
-        except BaseException:
+        except BaseException as exc:
             self._cursor = previous_cursor
-            self._logger.warning(
+            # Issue #860 — a handler crashing is the critical case this
+            # rollback exists for, and warning() alone discards the
+            # traceback that explains *why* it crashed; exception() logs it
+            # at ERROR with the traceback attached. CancelledError is
+            # deliberately excluded: it's routine shutdown/cancellation,
+            # not a handler bug, and would otherwise spam a full traceback
+            # on every cancelled task. The cursor still rolls back and the
+            # exception still propagates either way.
+            log = (
+                self._logger.exception
+                if not isinstance(exc, asyncio.CancelledError)
+                else self._logger.warning
+            )
+            log(
                 "Transaction handler failed; cursor rolled back",
                 extra={"cursor": previous_cursor, "paging_token": paging_token},
             )
