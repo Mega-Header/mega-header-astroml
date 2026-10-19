@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Model weight pruning framework supporting unstructured and structured pruning strategies.
 
 Supports L1/L2 norm unstructured magnitude pruning, structured channel/layer pruning,
@@ -16,6 +15,8 @@ from typing import Any
 import torch
 import torch.nn as nn
 import torch.nn.utils.prune as prune
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 

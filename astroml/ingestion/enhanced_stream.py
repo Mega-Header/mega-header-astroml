@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Enhanced Stellar SDK-based streaming service with robust error handling.
 
 Uses the Stellar SDK for improved reliability and provides comprehensive
@@ -44,6 +43,7 @@ from mega-header-astroml.ingestion.metrics import (
     STREAM_RECORDS_PROCESSED,
 )
 from mega-header-astroml.ingestion.parsers import parse_effect, parse_operation
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 try:
     from api.routers.streaming import update_stream_state
@@ -258,8 +258,11 @@ class EnhancedStellarStream:
             try:
                 flushed = self._batch_buffer.total_flushed
                 self._batch_buffer.close()
-                logger.info("Batch buffer closed | total_flushed=%d flush_count=%d",
-                    flushed, self._batch_buffer.flush_count)
+                logger.info(
+                    "Batch buffer closed | total_flushed=%d flush_count=%d",
+                    flushed,
+                    self._batch_buffer.flush_count,
+                )
             except AstroMLError:
                 logger.exception("Error closing batch buffer")
             finally:
@@ -513,7 +516,7 @@ class EnhancedStellarStream:
 
                 delay = min(
                     self.config.base_retry_delay * (2 ** (retry_count - 1)),
-                    self.config.max_retry_delay
+                    self.config.max_retry_delay,
                 )
                 await asyncio.sleep(delay)
 

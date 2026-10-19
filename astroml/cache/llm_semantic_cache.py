@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Semantic similarity cache for LLM responses.
 
 This module implements a similarity-based lookup layer:
@@ -35,6 +34,7 @@ from typing import Any
 import redis
 
 from mega-header-astroml.cache.redis_cache import RedisCache
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 
@@ -300,7 +300,7 @@ class SimpleDeterministicEmbeddingProvider(LLMEmbeddingProvider):
     Produces a fixed-length vector derived from hash of text.
     """
 
-    def __init__(self, dim -> Any: int = 64):
+    def __init__(self, dim: int = 64) -> None:
         self.dim = dim
 
     def embed(self, *, text: str, model: str) -> list[float]:

@@ -21,6 +21,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
 from typing import TYPE_CHECKING
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -73,6 +74,7 @@ class NotificationService:
     """Manages notification delivery across channels."""
 
     def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
 
     def send_notification(
@@ -346,6 +348,7 @@ class GitHubWebhookHandler:
     """Handles GitHub webhook events."""
 
     def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
         self.service = NotificationService(db)
 
@@ -449,6 +452,7 @@ class DigestEmailGenerator:
     """Generates weekly digest emails."""
 
     def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
 
     def generate_digest(self, user_id: int) -> dict[str, object]:
