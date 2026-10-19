@@ -23,6 +23,24 @@ For edge lists built in memory, the same contract is enforced on the
 from the caller, and a broken promise silently returned the wrong window
 because the binary search ran over an unsorted array; it now raises
 :class:`SnapshotOrderingError`.
+
+Lineage
+-------
+:func:`snapshot_lineage` (and :meth:`SnapshotWindow.lineage`) exposes the
+provenance of a built window — its source table, time bounds, counts, ordering
+contract and whether the payload honours it — without copying the edge list.
+This is the record downstream lineage/audit tooling should persist; it is a
+pure function of the window, so rebuilding the same window yields the same
+lineage (and the same default ``snapshot_id``).
+
+Environment drift
+-----------------
+Snapshot construction reads its database URL, cache backend and window
+defaults from the environment.  When those values diverge between the
+training, backfill and serving hosts the *same* window can be built from a
+different database or cache.  See ``docs/environment-drift.md`` for the
+reference matrix and drift checks; :class:`SnapshotLineage` records the
+window itself so two environments can be compared after the fact.
 """
 
 from __future__ import annotations
@@ -46,6 +64,18 @@ logger = logging.getLogger(__name__)
 # fetches rows from the DB in batches of this many; the iterator yields each
 # edge individually so callers never see a fully-materialised window list.
 DEFAULT_STREAM_CHUNK_SIZE = 5_000
+
+# Source table and total-order columns every DB-backed snapshot is built from.
+# Kept as plain names (rather than ORM columns) so the lineage record is a pure,
+# serialisable value that does not import the database layer.
+SNAPSHOT_SOURCE = "normalized_transactions"
+SNAPSHOT_ORDER_COLUMNS: tuple[str, ...] = (
+    "timestamp",
+    "ledger_sequence",
+    "operation_id",
+    "hop_index",
+    "id",
+)
 
 # RFC 7807 (application/problem+json) "type" base for this module's problems
 # — issue #949. These raise sites previously raised bare ``ValueError``s
@@ -360,6 +390,113 @@ class SnapshotWindow:
     end: datetime
     edges: list[Edge]
     nodes: set[str]
+
+    def lineage(self, *, snapshot_id: str | None = None) -> "SnapshotLineage":
+        """Return this window's provenance record — issue #888.
+
+        Args:
+            snapshot_id: Optional stable identifier; defaults to a deterministic
+                value derived from the source, index and bounds.
+
+        Returns:
+            A :class:`SnapshotLineage` describing this window.
+        """
+        return snapshot_lineage(self, snapshot_id=snapshot_id)
+
+
+@dataclass(frozen=True)
+class SnapshotLineage:
+    """Provenance of one snapshot window — issue #888.
+
+    A complete lineage record lets an audit or debugging tool answer "which
+    slice of which table produced this training example?" without loading the
+    edge payload.  Every field is a pure function of the window, so rebuilding
+    the same window produces an equal lineage record.
+
+    Attributes:
+        snapshot_id: Stable identifier for this window.
+        source: Source table the edges were read from.
+        window_index: Zero-based position of the window in the build sequence.
+        start: Inclusive UTC start bound.
+        end: Inclusive UTC end bound.
+        edge_count: Number of edges in the payload.
+        node_count: Number of distinct nodes in the payload.
+        first_timestamp: Epoch seconds of the first edge, or None if empty.
+        last_timestamp: Epoch seconds of the last edge, or None if empty.
+        order_by: Columns defining the snapshot's total order.
+        temporal_order_valid: Whether edges are in non-decreasing time order.
+    """
+
+    snapshot_id: str
+    source: str
+    window_index: int
+    start: datetime
+    end: datetime
+    edge_count: int
+    node_count: int
+    first_timestamp: int | None
+    last_timestamp: int | None
+    order_by: tuple[str, ...]
+    temporal_order_valid: bool
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return the lineage record as a JSON-serialisable dict."""
+        return {
+            "snapshot_id": self.snapshot_id,
+            "source": self.source,
+            "window_index": self.window_index,
+            "start": self.start.isoformat(),
+            "end": self.end.isoformat(),
+            "edge_count": self.edge_count,
+            "node_count": self.node_count,
+            "first_timestamp": self.first_timestamp,
+            "last_timestamp": self.last_timestamp,
+            "order_by": list(self.order_by),
+            "temporal_order_valid": self.temporal_order_valid,
+        }
+
+
+def snapshot_lineage(
+    window: SnapshotWindow,
+    *,
+    snapshot_id: str | None = None,
+    source: str = SNAPSHOT_SOURCE,
+) -> SnapshotLineage:
+    """Build a complete lineage record for ``window`` — issue #888.
+
+    Args:
+        window: The snapshot window to describe.
+        snapshot_id: Optional identifier. When omitted a deterministic id is
+            derived from ``source``, the window index and its bounds, so the
+            same window always maps to the same id across runs.
+        source: Source table name, defaults to :data:`SNAPSHOT_SOURCE`.
+
+    Returns:
+        A :class:`SnapshotLineage` with counts, bounds, ordering contract and
+        temporal-order validation for the window.  Empty windows are valid and
+        report ``first_timestamp``/``last_timestamp`` as ``None``.
+    """
+    if snapshot_id is None:
+        snapshot_id = (
+            f"{source}:{window.index}:{window.start.isoformat()}:{window.end.isoformat()}"
+        )
+
+    first_timestamp = window.edges[0].timestamp if window.edges else None
+    last_timestamp = window.edges[-1].timestamp if window.edges else None
+
+    return SnapshotLineage(
+        snapshot_id=snapshot_id,
+        source=source,
+        window_index=window.index,
+        start=window.start,
+        end=window.end,
+        edge_count=len(window.edges),
+        node_count=len(window.nodes),
+        first_timestamp=first_timestamp,
+        last_timestamp=last_timestamp,
+        order_by=SNAPSHOT_ORDER_COLUMNS,
+        temporal_order_valid=_first_inversion(window.edges) < 0,
+    )
 
 
 def _parse_window_size(window: str) -> timedelta:
