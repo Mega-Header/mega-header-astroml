@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """LLM feature generation orchestration.
 
 Provides high-level generators that orchestrate LLM calls and
@@ -29,6 +28,7 @@ from mega-header-astroml.features.scoring_features import (
     FraudProbabilityComputer,
     UncertaintyEstimatorComputer,
 )
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 

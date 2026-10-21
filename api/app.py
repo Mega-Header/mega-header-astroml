@@ -42,7 +42,11 @@ from api.middleware.errors import (
     request_validation_exception_handler,
     unhandled_exception_handler,
 )
-from api.middleware.https import HSTSMiddleware, HTTPSRedirectMiddleware
+from api.middleware.https import (
+    HSTSMiddleware,
+    HTTPSRedirectMiddleware,
+    enforce_https_in_production,
+)
 from api.routers import (
     accounts_router,
     admin,
@@ -262,6 +266,9 @@ app.add_middleware(
     report_uri=settings.csp_report_uri,
     enable_nonce=settings.csp_enable_nonce,
 )
+# Fail fast at startup if running in production without HTTPS/HSTS
+# enforcement, rather than silently serving plaintext HTTP (#869).
+enforce_https_in_production(settings.https_enabled, settings.hsts_enabled)
 app.add_middleware(
     HTTPSRedirectMiddleware,
     enabled=settings.https_enabled,

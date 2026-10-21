@@ -1,9 +1,9 @@
-from typing import Any, Dict, List, Optional, Union, Callable
 import time
+from typing import Any, Callable, Dict, List, Optional, Union
 
 
 class EvictionPolicy:
-    def __init__(self, max_size: int = 100, strategy: str = "LRU"):
+    def __init__(self, max_size: int = 100, strategy: str = "LRU") -> None:
         self.max_size = max_size
         self.strategy = strategy.upper()  # "LRU" or "LFU"
         # Key -> last_accessed or access_count

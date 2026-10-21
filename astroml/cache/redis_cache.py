@@ -26,6 +26,8 @@ import pandas as pd
 import redis
 from redis.client import Redis
 
+from mega-header-astroml.utils.exceptions import AstroMLError
+
 logger = logging.getLogger(__name__)
 
 
@@ -118,7 +120,7 @@ class RedisCache:
             cls._instance._initialized = False
         return cls._instance
 
-    def __init__(self, config: CacheConfig | None = None):
+    def __init__(self, config: CacheConfig | None = None) -> None:
         """Initialize Redis cache.
 
         Args:

@@ -24,6 +24,7 @@ from mega-header-astroml.training.compression.quantization import (
     QuantizationConfig,
     QuantizationType,
 )
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 

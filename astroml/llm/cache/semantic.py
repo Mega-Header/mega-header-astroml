@@ -109,8 +109,8 @@ class SemanticCache:
         logger.debug("Cached semantic entry: %s...", cache_key[:16])
 
 
-class MinimalSemanticCache:
-    def __init__(self, similarity_threshold: float = 0.85, ttl: int = 86400, **kwargs):
+class SemanticCache:
+    def __init__(self, similarity_threshold: float = 0.85, ttl: int = 86400, **kwargs) -> None:
         self.threshold = similarity_threshold
         self.ttl = ttl
         self.cache: dict[str, tuple[str, list[float], float]] = {}
@@ -144,8 +144,6 @@ class MinimalSemanticCache:
         return None
 
     def set(self, query: str, response: str):
-        from mega-header-astroml.search.embedders import get_embedder
-
         embedder = get_embedder()
         vec = embedder.generate_embedding(query)
         self.cache[query] = (response, vec, time.time() + self.ttl)

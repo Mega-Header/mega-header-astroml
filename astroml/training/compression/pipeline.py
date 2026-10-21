@@ -20,6 +20,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+from mega-header-astroml.utils.exceptions import AstroMLError
+
 from .distillation import DistillationConfig, KnowledgeDistiller
 from .pruning import ModelPruner, PruningConfig
 from .quantization import ModelQuantizer, QuantizationConfig

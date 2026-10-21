@@ -1,10 +1,10 @@
-from typing import Any, Dict, List, Optional, Union, Callable
 """Tests for enhanced streaming service with robust error handling."""
 
 from __future__ import annotations
 
 import asyncio
 import time
+from typing import Any, Callable, Dict, List, Optional, Union
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest

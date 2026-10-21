@@ -10,6 +10,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
 
+from mega-header-astroml.utils.exceptions import AstroMLError
 from mega-header-astroml.validation.data_quality.alerts import (
     AlertManager,
     AlertRule,
@@ -83,11 +84,15 @@ async def check_data_quality(payload: CheckRequest) -> dict[str, Any]:
             "check_results": [
                 {
                     "check_name": c.check_name,
-                    "dimension": c.dimension.value if hasattr(c.dimension, "value") else str(c.dimension),
+                    "dimension": (
+                        c.dimension.value if hasattr(c.dimension, "value") else str(c.dimension)
+                    ),
                     "is_valid": c.is_valid,
                     "score": round(c.score * 100.0, 2),
                     "message": c.message,
-                    "severity": c.severity.value if hasattr(c.severity, "value") else str(c.severity),
+                    "severity": (
+                        c.severity.value if hasattr(c.severity, "value") else str(c.severity)
+                    ),
                 }
                 for c in report.check_results
             ],

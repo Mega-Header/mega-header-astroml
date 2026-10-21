@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Structural importance metrics for account nodes.
 
 This module provides various centrality and importance measures for nodes
@@ -22,6 +21,8 @@ from collections.abc import Iterable
 
 import numpy as np
 import pandas as pd
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 Edge = dict[str, object]
 

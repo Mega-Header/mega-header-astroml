@@ -18,6 +18,8 @@ import torch
 import torch.nn as nn
 import torch.nn.utils.prune as prune
 
+from mega-header-astroml.utils.exceptions import AstroMLError
+
 logger = logging.getLogger(__name__)
 
 

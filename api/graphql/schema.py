@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import List, Optional
 
 import strawberry
@@ -41,7 +42,6 @@ from api.models.orm import (
     ApiKey,
     ApiTransaction,
     AuditLog,
-    FraudAlert as FraudAlertModel,
     LoyaltyPoints,
     Mentee,
     Mentor,
@@ -51,6 +51,11 @@ from api.models.orm import (
     PointsTransaction,
     User,
 )
+from api.models.orm import (
+    FraudAlert as FraudAlertModel,
+)
+
+logger = logging.getLogger(__name__)
 
 
 # Query resolvers
@@ -199,7 +204,9 @@ class Query:
         if resolved is not None:
             query = query.filter_by(resolved=resolved)
         total = query.count()
-        alerts = query.order_by(FraudAlertModel.detected_at.desc()).offset(offset).limit(limit).all()
+        alerts = (
+            query.order_by(FraudAlertModel.detected_at.desc()).offset(offset).limit(limit).all()
+        )
 
         return FraudAlertConnection(
             edges=[
@@ -522,7 +529,11 @@ class Subscription:
         """Subscribe to new transactions."""
         import asyncio
 
-        from api.graphql.subscriptions import transaction_queue
+        from api.graphql.subscriptions import transaction_queue  # type: ignore[import-not-found]
+
+        # api/graphql/subscriptions.py (the pub/sub queue backing this
+        # subscription) does not exist yet; tracked separately from this
+        # mypy-batch fix.
 
         while True:
             try:
@@ -543,7 +554,10 @@ class Subscription:
                 )
             except asyncio.CancelledError:
                 break
-            except Exception:
+            except (
+                Exception
+            ) as exc:  # noqa: BLE001 - one bad queue item must not kill the subscription
+                logger.warning("GraphQL subscription poll failed: %s", exc, exc_info=True)
                 await asyncio.sleep(0.1)
 
     @strawberry.subscription
@@ -568,7 +582,10 @@ class Subscription:
                 )
             except asyncio.CancelledError:
                 break
-            except Exception:
+            except (
+                Exception
+            ) as exc:  # noqa: BLE001 - one bad queue item must not kill the subscription
+                logger.warning("GraphQL subscription poll failed: %s", exc, exc_info=True)
                 await asyncio.sleep(0.1)
 
     @strawberry.subscription
@@ -591,7 +608,10 @@ class Subscription:
                 )
             except asyncio.CancelledError:
                 break
-            except Exception:
+            except (
+                Exception
+            ) as exc:  # noqa: BLE001 - one bad queue item must not kill the subscription
+                logger.warning("GraphQL subscription poll failed: %s", exc, exc_info=True)
                 await asyncio.sleep(0.1)
 
 
