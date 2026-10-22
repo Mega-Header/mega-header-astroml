@@ -3,12 +3,22 @@
 from __future__ import annotations
 
 import logging
+import os
 from typing import List, Optional
 
 import strawberry
 from strawberry import ID
+from strawberry.extensions import QueryDepthLimiter
 from strawberry.tools import merge_types
 from strawberry.types import Info
+
+#: Maximum nesting depth a GraphQL query/mutation may have. The schema's
+#: Connection/edges/node pattern (and relations like Transaction -> Account
+#: -> transactions -> ...) lets a client nest arbitrarily deep, which costs
+#: the server resolver work and DB queries proportional to depth -- an
+#: unauthenticated or low-privilege client could otherwise submit a single
+#: deeply nested query as a cheap denial-of-service vector.
+GRAPHQL_MAX_QUERY_DEPTH = int(os.environ.get("GRAPHQL_MAX_QUERY_DEPTH", "10"))
 
 from api.database import _sync_session_factory
 from api.graphql.context import GraphQLContext, get_graphql_context
@@ -620,4 +630,5 @@ schema = strawberry.Schema(
     query=Query,
     mutation=Mutation,
     subscription=Subscription,
+    extensions=[lambda: QueryDepthLimiter(max_depth=GRAPHQL_MAX_QUERY_DEPTH)],
 )
