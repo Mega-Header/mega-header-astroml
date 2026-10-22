@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Neural architecture search (NAS) framework.
 
 Samples feed-forward network architectures and evaluates them with
@@ -17,6 +16,8 @@ from typing import Any
 import numpy as np
 from sklearn.model_selection import cross_val_score
 from sklearn.neural_network import MLPClassifier
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 Activation = str  # one of "relu", "tanh", "logistic"
 

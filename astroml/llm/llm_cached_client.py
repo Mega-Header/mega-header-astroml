@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Cached LLM client wrapper.
 
 This wrapper is provider-agnostic. It expects an injected underlying client
@@ -28,6 +27,7 @@ from mega-header-astroml.cache.llm_semantic_cache import (
     SemanticCacheConfig,
 )
 from mega-header-astroml.cache.redis_cache import RedisCache
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 
