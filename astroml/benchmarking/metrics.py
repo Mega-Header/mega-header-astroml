@@ -111,10 +111,30 @@ class LinkPredictionMetrics:
         return metrics
 
     @staticmethod
+    def _top_k_indices(y_scores: np.ndarray, k: int) -> np.ndarray:
+        """Indices of the top-`k` scores, empty for `k <= 0` (issue #841).
+
+        ``np.argsort(y_scores)[-k:]`` is correct for any positive `k`, but
+        at `k == 0` Python/NumPy's negative-slice convention makes
+        ``[-0:]`` equivalent to ``[0:]`` — the *whole* array, not an empty
+        one. An empty top-0 prediction set should contribute nothing to
+        any of Hits@K/Precision@K/Recall@K; silently scoring against every
+        sample instead made all three wrong (and, for Hits@K and Recall@K,
+        wrong in the "looks plausible" direction of a non-zero score,
+        rather than an obvious crash).
+        """
+        if k <= 0:
+            return np.array([], dtype=int)
+        return np.argsort(y_scores)[-k:]
+
+    @staticmethod
     def _hits_at_k(y_true: np.ndarray, y_scores: np.ndarray, k: int) -> float:
         """Compute Hits@K metric."""
+        if len(y_true) == 0:
+            return 0.0
+
         # Get top-k predictions
-        top_k_indices = np.argsort(y_scores)[-k:]
+        top_k_indices = LinkPredictionMetrics._top_k_indices(y_scores, k)
 
         # Check if any true link is in top-k
         hits = 0
@@ -127,8 +147,16 @@ class LinkPredictionMetrics:
 
     @staticmethod
     def _precision_at_k(y_true: np.ndarray, y_scores: np.ndarray, k: int) -> float:
-        """Compute Precision@K metric."""
-        top_k_indices = np.argsort(y_scores)[-k:]
+        """Compute Precision@K metric.
+
+        An empty prediction set (`k <= 0`) has no well-defined precision
+        (0 relevant retrieved out of 0 retrieved); returns 0.0 rather than
+        dividing by zero.
+        """
+        if k <= 0:
+            return 0.0
+
+        top_k_indices = LinkPredictionMetrics._top_k_indices(y_scores, k)
         top_k_true = y_true[top_k_indices]
 
         return np.sum(top_k_true) / k
@@ -136,12 +164,12 @@ class LinkPredictionMetrics:
     @staticmethod
     def _recall_at_k(y_true: np.ndarray, y_scores: np.ndarray, k: int) -> float:
         """Compute Recall@K metric."""
-        top_k_indices = np.argsort(y_scores)[-k:]
-        top_k_true = y_true[top_k_indices]
-
         total_true = np.sum(y_true)
         if total_true == 0:
             return 0.0
+
+        top_k_indices = LinkPredictionMetrics._top_k_indices(y_scores, k)
+        top_k_true = y_true[top_k_indices]
 
         return np.sum(top_k_true) / total_true
 
