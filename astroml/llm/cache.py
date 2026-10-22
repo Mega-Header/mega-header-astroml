@@ -6,6 +6,7 @@ from mega-header-astroml.utils.exceptions import AstroMLError
 
 import hashlib
 import os
+import time
 
 try:
     import redis
@@ -31,9 +32,6 @@ class SemanticCache:
 
     def _hash_prompt(self, prompt: str) -> str:
         """Create a hash of the prompt for exact matching."""
-        # For true semantic caching, we would use an embedding model
-        # and store vectors in a vector DB (like Redisearch or Pinecone).
-        # As a placeholder, we'll use a simple SHA256 hash.
         return hashlib.sha256(prompt.encode("utf-8")).hexdigest()
 
     def get(self, prompt: str) -> str | None:
@@ -43,7 +41,14 @@ class SemanticCache:
 
         cache_key = f"llm_cache:{self._hash_prompt(prompt)}"
         try:
-            return self.redis_client.get(cache_key)
+            value = self.redis_client.get(cache_key)
+            if value is None:
+                return None
+            expires_at = self.redis_client.ttl(cache_key)
+            if expires_at is not None and expires_at <= 0:
+                self.redis_client.delete(cache_key)
+                return None
+            return value
         except AstroMLError:
             return None
 

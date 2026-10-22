@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from importlib import import_module
 from typing import Any
 

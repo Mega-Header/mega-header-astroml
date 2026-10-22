@@ -6,6 +6,8 @@ FP16 half-precision casting, and Quantization-Aware Training (QAT).
 
 from __future__ import annotations
 
+from mega-header-astroml.utils.exceptions import AstroMLError
+
 import copy
 import logging
 from dataclasses import dataclass, field

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from mega-header-astroml.utils.exceptions import AstroMLError
+
 import logging
 import uuid
 from typing import Any, Literal

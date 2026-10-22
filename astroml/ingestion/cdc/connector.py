@@ -12,6 +12,8 @@ Components:
 
 from __future__ import annotations
 
+from mega-header-astroml.utils.exceptions import AstroMLError
+
 import json
 import logging
 from collections.abc import Callable, Iterator

@@ -6,6 +6,8 @@ feature selection, plus held-out evaluation of a stored selection.
 
 from __future__ import annotations
 
+from mega-header-astroml.utils.exceptions import AstroMLError
+
 import logging
 import time
 import uuid

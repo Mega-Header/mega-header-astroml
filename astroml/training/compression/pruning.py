@@ -6,6 +6,8 @@ global pruning, and sparsity evaluation.
 
 from __future__ import annotations
 
+from mega-header-astroml.utils.exceptions import AstroMLError
+
 import copy
 import logging
 from dataclasses import dataclass, field

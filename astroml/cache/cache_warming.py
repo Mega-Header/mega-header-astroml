@@ -6,6 +6,8 @@ Pre-loads frequently accessed data into Redis cache to improve performance.
 
 from __future__ import annotations
 
+from mega-header-astroml.utils.exceptions import AstroMLError
+
 import logging
 from datetime import datetime
 from typing import Any
@@ -73,7 +75,7 @@ class CacheWarmer:
 
                 results[account_id] = True
                 success_count += 1
-            except AstroMLError as e:
+            except (AstroMLError, redis.exceptions.RedisError, RuntimeError) as e:
                 logger.warning(f"Failed to warm cache for account {account_id}: {e}")
                 results[account_id] = False
 
@@ -111,7 +113,7 @@ class CacheWarmer:
 
                 results[feature_name] = True
                 success_count += 1
-            except AstroMLError as e:
+            except (AstroMLError, redis.exceptions.RedisError, RuntimeError) as e:
                 logger.warning(f"Failed to warm cache for feature {feature_name}: {e}")
                 results[feature_name] = False
 
@@ -151,7 +153,7 @@ class CacheWarmer:
 
                 results[snapshot_id] = True
                 success_count += 1
-            except AstroMLError as e:
+            except (AstroMLError, redis.exceptions.RedisError, RuntimeError) as e:
                 logger.warning(f"Failed to warm cache for snapshot {snapshot_id}: {e}")
                 results[snapshot_id] = False
 
