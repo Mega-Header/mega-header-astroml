@@ -242,8 +242,8 @@ class RedisCache:
                     # Use first 100 rows as a quick hash
                     sample = arg.head(100).to_csv(index=False).encode("utf-8")
                     key_parts.append(hashlib.md5(sample).hexdigest()[:8])
-                except:
-                    pass
+                except (ValueError, TypeError, AttributeError, Exception) as exc:
+                    logger.debug("Failed to hash DataFrame sample: %s", exc)
             elif isinstance(arg, (list, tuple, set)):
                 key_parts.append(f"list:{len(arg)}")
             else:
@@ -253,6 +253,11 @@ class RedisCache:
         for k, v in sorted(kwargs.items()):
             if isinstance(v, pd.DataFrame):
                 key_parts.append(f"{k}:df:{v.shape[0]}x{v.shape[1]}")
+                try:
+                    sample = v.head(100).to_csv(index=False).encode("utf-8")
+                    key_parts.append(hashlib.md5(sample).hexdigest()[:8])
+                except (ValueError, TypeError, AttributeError, Exception) as exc:
+                    logger.debug("Failed to hash kwargs DataFrame sample: %s", exc)
             elif isinstance(v, (list, tuple, set)):
                 key_parts.append(f"{k}:list:{len(v)}")
             else:
@@ -282,7 +287,8 @@ class RedisCache:
                     # If not pickle, try JSON
                     try:
                         return json.loads(data.decode("utf-8"))
-                    except:
+                    except (json.JSONDecodeError, UnicodeDecodeError, AttributeError) as exc:
+                        logger.debug("Failed to decode JSON from cached data: %s", exc)
                         return data
             else:
                 self._stats.misses += 1
