@@ -309,8 +309,9 @@ def window_snapshot(
         SnapshotOrderingError: ``presorted=True`` and the edges are not in
             non-decreasing timestamp order.
 
-    Efficiency:
-      Uses binary search to find left/right indices and then slices, O(log N + K).
+        Efficiency:
+            Binary search finds the window boundaries without allocating a separate
+            timestamp array; the returned slice costs O(K).
     """
     if start_ts > end_ts:
         raise _invalid_window_bounds_error(start_ts, end_ts)
@@ -321,21 +322,16 @@ def window_snapshot(
     # is the concern in the first place.
     if presorted:
         sorted_edges = edges if isinstance(edges, list) else list(edges)
-        # The scan below allocates nothing and is linear like the timestamp
-        # array built a few lines down, so checking costs about what the array
-        # already costs — while an unchecked violation would return a window
-        # that is quietly wrong, since bisect only works on sorted input.
+        # Reject invalid promises before binary search, which requires ordered
+        # input to return correct window boundaries.
         validate_temporal_order(sorted_edges, context="edges passed with presorted=True")
     else:
         sorted_edges = _ensure_sorted_by_ts(edges)
 
-    # Build an array of timestamps for bisect, referencing the same order.
-    ts = [e.timestamp for e in sorted_edges]
-
     # Left bound: first index with timestamp >= start_ts
-    left = bisect.bisect_left(ts, start_ts)
+    left = bisect.bisect_left(sorted_edges, start_ts, key=lambda edge: edge.timestamp)
     # Right bound: last index with timestamp <= end_ts -> use bisect_right and subtract 1
-    right_exclusive = bisect.bisect_right(ts, end_ts)
+    right_exclusive = bisect.bisect_right(sorted_edges, end_ts, key=lambda edge: edge.timestamp)
 
     if left >= right_exclusive:
         return set(), []
