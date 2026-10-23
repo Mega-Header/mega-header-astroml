@@ -1,5 +1,6 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 from __future__ import annotations
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 """
 Ingestion benchmark utility.

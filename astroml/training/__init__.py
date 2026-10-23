@@ -1,5 +1,5 @@
-from typing import Any, Dict, List, Optional, Union, Callable
 from importlib import import_module
+from typing import Any, Callable, Dict, List, Optional, Union
 
 __all__ = [
     "temporal_split",
@@ -25,6 +25,8 @@ __all__ = [
     "available_objectives",
     "validate_edge_index",
     "validate_masks",
+    "SearchSpace",
+    "HPOptimizer",
 ]
 
 _LAZY = {
@@ -41,7 +43,10 @@ _LAZY = {
     "EarlyStoppingConfig": ("mega-header-astroml.training.config", "EarlyStoppingConfig"),
     "TemporalSplitConfig": ("mega-header-astroml.training.config", "TemporalSplitConfig"),
     "OptimizerConfig": ("mega-header-astroml.training.config", "OptimizerConfig"),
-    "ContinuousLearningPipeline": ("mega-header-astroml.training.continuous_learning", "ContinuousLearningPipeline"),
+    "ContinuousLearningPipeline": (
+        "mega-header-astroml.training.continuous_learning",
+        "ContinuousLearningPipeline",
+    ),
     "ModelVersionManager": ("mega-header-astroml.training.continuous_learning", "ModelVersionManager"),
     "GraphObjective": ("mega-header-astroml.training.graph_objectives", "GraphObjective"),
     "NodeClassificationObjective": (
@@ -57,10 +62,12 @@ _LAZY = {
     "available_objectives": ("mega-header-astroml.training.graph_objectives", "available_objectives"),
     "validate_edge_index": ("mega-header-astroml.training.graph_objectives", "validate_edge_index"),
     "validate_masks": ("mega-header-astroml.training.graph_objectives", "validate_masks"),
+    "SearchSpace": ("mega-header-astroml.training.hyperparameter_optimization", "SearchSpace"),
+    "HPOptimizer": ("mega-header-astroml.training.hyperparameter_optimization", "HPOptimizer"),
 }
 
 
-def __getattr__(name -> Any: str):
+def __getattr__(name: str):
     if name in _LAZY:
         module_path, attr = _LAZY[name]
         module = import_module(module_path)

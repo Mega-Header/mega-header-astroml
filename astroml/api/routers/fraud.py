@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Fraud Detection API endpoints for AstroML.
 
 Provides real-time fraud scoring, paginated alert listing, and
@@ -19,6 +18,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from mega-header-astroml.api.models import FraudAlert
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 
@@ -123,7 +123,7 @@ async def score_accounts(body: ScoreRequest) -> JSONResponse:
 
     try:
         from mega-header-astroml.pipeline.scoring import InductiveAnomalyScorer  # noqa: F401
-    except (ImportError, Exception) as exc:
+    except (ImportError, Exception) as exc:  # noqa: BLE001 - surfaced as a 503, not swallowed
         logger.warning("Scoring pipeline unavailable: %s", exc)
         return JSONResponse(
             status_code=503,
@@ -152,7 +152,7 @@ async def score_accounts(body: ScoreRequest) -> JSONResponse:
             account_ids=body.accounts,
             ref_time=_time.time(),
         )
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 - checkpoint errors vary by backend; surfaced as a 503
         logger.warning("Model checkpoint unavailable or corrupted: %s", exc)
         return JSONResponse(
             status_code=503,

@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Feature computation functions for LLM-generated features.
 
 Provides the actual computation logic that calls LLM providers
@@ -14,6 +13,7 @@ import pandas as pd
 
 from mega-header-astroml.llm.providers.embedding_router import build_default_router
 from mega-header-astroml.llm.providers.factory import get_llm_provider
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 
