@@ -46,6 +46,7 @@ from typing import Any, Callable, Dict, List, Optional, Protocol, runtime_checka
 import pandas as pd
 from cachetools import TTLCache
 
+from mega-header-astroml.utils.exceptions import AstroMLError
 from mega-header-astroml.features.schema_validation import (
     FEATURE_VALUE_SCHEMA,
     ValidationResult,
