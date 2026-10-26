@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Post-tuning evaluation for fine-tuned models.
 
 Provides automated evaluation against holdout sets, baseline
@@ -12,6 +11,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 import numpy as np
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 

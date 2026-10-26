@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Data lineage API router for AstroML.
 
 Provides REST endpoints for querying and recording lineage and provenance
@@ -16,6 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from mega-header-astroml.tracking.lineage.data_lineage import DataLineageTracker
 from mega-header-astroml.tracking.lineage.provenance import ProvenanceTracker
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 
