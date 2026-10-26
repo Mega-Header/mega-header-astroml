@@ -13,6 +13,7 @@ import hashlib
 import json
 import logging
 import os
+import subprocess
 import time
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
@@ -212,10 +213,14 @@ def infer_output_schema(model: Any, sample_input: Any = None) -> dict[str, Any] 
 
 
 def detect_git_commit() -> str | None:
-    """Detect the current git commit hash, if available."""
-    try:
-        import subprocess
+    """Detect the current git commit hash, if available.
 
+    Returns None rather than raising whenever git isn't usable in this
+    environment: not installed, not a git checkout, or the call times out
+    (#840 caught this catching the wrong exception type, which crashed
+    instead of degrading gracefully exactly when it needed to).
+    """
+    try:
         result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
             capture_output=True,
@@ -224,7 +229,7 @@ def detect_git_commit() -> str | None:
         )
         if result.returncode == 0:
             return result.stdout.strip()
-    except AstroMLError:
+    except (OSError, subprocess.SubprocessError):
         pass
     return None
 

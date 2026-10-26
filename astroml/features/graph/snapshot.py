@@ -57,6 +57,7 @@ from itertools import islice
 from typing import Any
 
 from ...cache import cached_graph_snapshot
+from ...storage.artifact_metadata import detect_git_commit
 
 logger = logging.getLogger(__name__)
 
@@ -387,17 +388,22 @@ class SnapshotWindow:
     edges: list[Edge]
     nodes: set[str]
 
-    def lineage(self, *, snapshot_id: str | None = None) -> "SnapshotLineage":
+    def lineage(
+        self, *, snapshot_id: str | None = None, seed: int | None = None
+    ) -> "SnapshotLineage":
         """Return this window's provenance record — issue #888.
 
         Args:
             snapshot_id: Optional stable identifier; defaults to a deterministic
                 value derived from the source, index and bounds.
+            seed: RNG seed used for this run, recorded on the returned
+                lineage so a result can be traced back to the seed that
+                produced it (#840).
 
         Returns:
             A :class:`SnapshotLineage` describing this window.
         """
-        return snapshot_lineage(self, snapshot_id=snapshot_id)
+        return snapshot_lineage(self, snapshot_id=snapshot_id, seed=seed)
 
 
 @dataclass(frozen=True)
@@ -406,8 +412,12 @@ class SnapshotLineage:
 
     A complete lineage record lets an audit or debugging tool answer "which
     slice of which table produced this training example?" without loading the
-    edge payload.  Every field is a pure function of the window, so rebuilding
-    the same window produces an equal lineage record.
+    edge payload.  Every field through ``temporal_order_valid`` is a pure
+    function of the window, so rebuilding the same window produces an equal
+    lineage record. ``seed`` and ``git_commit`` (#840) are not: they capture
+    the *run's* environment (the RNG seed passed by the caller, the code
+    revision in the working tree when the run happened), answering "is this
+    result reproducible, and from which code" rather than "which rows".
 
     Attributes:
         snapshot_id: Stable identifier for this window.
@@ -421,6 +431,9 @@ class SnapshotLineage:
         last_timestamp: Epoch seconds of the last edge, or None if empty.
         order_by: Columns defining the snapshot's total order.
         temporal_order_valid: Whether edges are in non-decreasing time order.
+        seed: RNG seed the caller used for this run, or None if not supplied.
+        git_commit: Git commit hash of the working tree at run time, or None
+            if unavailable (not a git checkout, git not installed, etc.).
     """
 
     snapshot_id: str
@@ -434,6 +447,8 @@ class SnapshotLineage:
     last_timestamp: int | None
     order_by: tuple[str, ...]
     temporal_order_valid: bool
+    seed: int | None = None
+    git_commit: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Return the lineage record as a JSON-serialisable dict."""
@@ -449,6 +464,8 @@ class SnapshotLineage:
             "last_timestamp": self.last_timestamp,
             "order_by": list(self.order_by),
             "temporal_order_valid": self.temporal_order_valid,
+            "seed": self.seed,
+            "git_commit": self.git_commit,
         }
 
 
@@ -457,6 +474,7 @@ def snapshot_lineage(
     *,
     snapshot_id: str | None = None,
     source: str = SNAPSHOT_SOURCE,
+    seed: int | None = None,
 ) -> SnapshotLineage:
     """Build a complete lineage record for ``window`` — issue #888.
 
@@ -466,6 +484,11 @@ def snapshot_lineage(
             derived from ``source``, the window index and its bounds, so the
             same window always maps to the same id across runs.
         source: Source table name, defaults to :data:`SNAPSHOT_SOURCE`.
+        seed: RNG seed used for this run (#840). Recorded as-is on the
+            returned lineage; pass the same seed given to
+            ``torch.manual_seed``/the training config so results can be
+            traced back to the seed that produced them. ``git_commit`` is
+            captured automatically via :func:`detect_git_commit`.
 
     Returns:
         A :class:`SnapshotLineage` with counts, bounds, ordering contract and
@@ -492,6 +515,8 @@ def snapshot_lineage(
         last_timestamp=last_timestamp,
         order_by=SNAPSHOT_ORDER_COLUMNS,
         temporal_order_valid=_first_inversion(window.edges) < 0,
+        seed=seed,
+        git_commit=detect_git_commit(),
     )
 
 
