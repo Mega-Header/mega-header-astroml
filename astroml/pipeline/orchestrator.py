@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Automated pipeline orchestration engine supporting Airflow and Dagster patterns.
 
 Provides DAG graph definition, task dependency management, topological resolution,
@@ -15,6 +14,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 

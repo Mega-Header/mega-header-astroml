@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Data versioning integration with DVC for dataset reproducibility.
 
 Provides versioned dataset management, snapshots, tagging, annotation,
@@ -16,6 +15,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 
@@ -35,9 +36,7 @@ class DatasetVersion:
     parent_version_id: str | None = None
     size_bytes: int = 0
     num_files: int = 0
-    created_at: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
@@ -356,9 +355,7 @@ class DataVersionControl:
     # DVC operations
     # ------------------------------------------------------------------
 
-    def push(
-        self, version_id: str | None = None
-    ) -> dict[str, Any]:
+    def push(self, version_id: str | None = None) -> dict[str, Any]:
         """Push tracked data to the DVC remote.
 
         Args:
@@ -465,9 +462,7 @@ class DataVersionControl:
             "created_at": ver.created_at,
         }
 
-    def export_snapshot_json(
-        self, version_id: str, output_path: str | Path | None = None
-    ) -> str:
+    def export_snapshot_json(self, version_id: str, output_path: str | Path | None = None) -> str:
         """Export a version snapshot as JSON.
 
         Args:
@@ -523,9 +518,7 @@ class DataVersionControl:
         if params:
             import tempfile
 
-            tmp = tempfile.NamedTemporaryFile(
-                mode="w", suffix=".yaml", delete=False
-            )
+            tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False)
             import yaml
 
             yaml.safe_dump(params, tmp)

@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Dedicated model storage backend for saving, loading, and verifying ML model artifacts.
 
 Provides serialization, checksum calculation, and storage management for PyTorch,
@@ -20,6 +19,7 @@ from pathlib import Path
 from typing import Any
 
 from mega-header-astroml.storage.artifact_store import ArtifactStore, LocalArtifactStore
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 
@@ -32,17 +32,20 @@ def _collect_framework_metadata() -> dict[str, str]:
     }
     try:
         import torch  # type: ignore
+
         meta["torch_version"] = torch.__version__
         meta["torch_cuda_available"] = str(torch.cuda.is_available())
     except ImportError:
         pass
     try:
         import sklearn  # type: ignore
+
         meta["sklearn_version"] = sklearn.__version__
     except ImportError:
         pass
     try:
         import numpy as np  # type: ignore
+
         meta["numpy_version"] = np.__version__
     except ImportError:
         pass
