@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Cross-validation framework and evaluation engine for AstroML.
 
 Provides comprehensive metric computation, time-series leakage detection,
@@ -28,6 +27,7 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 
+from mega-header-astroml.utils.exceptions import AstroMLError
 from mega-header-astroml.validation.leakage import LeakageError
 from mega-header-astroml.validation.splitters import (
     BaseSplitter,

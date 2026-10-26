@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Enriched artifact metadata for model registry entries — issue #765.
 
 Attaches useful metadata on registration: framework and torch versions,
@@ -19,6 +18,8 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 
@@ -74,9 +75,7 @@ class ArtifactMetadata:
     git_commit: str | None = None
     training_config: dict[str, Any] | None = None
     custom: dict[str, Any] = field(default_factory=dict)
-    registered_at: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    registered_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     def to_dict(self) -> dict[str, Any]:
         """Serialise to a JSON-compatible dict."""

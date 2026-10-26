@@ -18,10 +18,15 @@ Dependencies:
 - aiohttp: Async HTTP client for streaming
 """
 
-from mega-header-astroml.ingestion.horizon_stream import HorizonStreamError, HorizonStreamingClient
+from mega-header-astroml.ingestion.horizon_stream import (
+    HorizonRateLimitedError,
+    HorizonStreamError,
+    HorizonStreamingClient,
+)
 from mega-header-astroml.ingestion.service import BackfillCheckpointManager
 
 __all__ = [
+    "HorizonRateLimitedError",
     "HorizonStreamError",
     "HorizonStreamingClient",
     "BackfillCheckpointManager",

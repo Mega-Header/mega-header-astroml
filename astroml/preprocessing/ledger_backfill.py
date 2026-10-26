@@ -1,4 +1,3 @@
-from mega-header-astroml.utils.exceptions import AstroMLError
 """Polars-based preprocessing for large ledger backfill datasets.
 
 This module is designed for backfills with millions of rows. It keeps work in
@@ -23,6 +22,7 @@ from sqlalchemy.orm import Session
 
 from mega-header-astroml.db.schema import ProcessedLedger
 from mega-header-astroml.db.session import get_session
+from mega-header-astroml.utils.exceptions import AstroMLError
 
 logger = logging.getLogger(__name__)
 
