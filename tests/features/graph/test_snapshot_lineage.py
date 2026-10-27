@@ -25,10 +25,14 @@ T1 = T0 + timedelta(hours=1)
 
 
 def _window(edges: list[Edge] | None = None, *, index: int = 0) -> SnapshotWindow:
-    edges = edges if edges is not None else [
-        Edge(src="alice", dst="bob", timestamp=1_000),
-        Edge(src="bob", dst="carol", timestamp=1_100),
-    ]
+    edges = (
+        edges
+        if edges is not None
+        else [
+            Edge(src="alice", dst="bob", timestamp=1_000),
+            Edge(src="bob", dst="carol", timestamp=1_100),
+        ]
+    )
     nodes = {e.src for e in edges} | {e.dst for e in edges}
     return SnapshotWindow(index=index, start=T0, end=T1, edges=edges, nodes=nodes)
 
@@ -65,6 +69,8 @@ def test_lineage_to_dict_exposes_every_field() -> None:
         "last_timestamp",
         "order_by",
         "temporal_order_valid",
+        "seed",
+        "git_commit",
     }
     assert payload["start"] == T0.isoformat()
     assert payload["end"] == T1.isoformat()
@@ -115,3 +121,45 @@ def test_window_lineage_method_matches_function() -> None:
 
     assert window.lineage() == snapshot_lineage(window)
     assert window.lineage(snapshot_id="explicit").snapshot_id == "explicit"
+
+
+def test_seed_defaults_to_none_and_is_recorded_when_supplied() -> None:
+    """GitHub Issue #840: a result's lineage must be able to trace back to
+    the RNG seed that produced it. seed is purely a caller-supplied value,
+    not derived from the window, so it defaults to None and is recorded
+    verbatim whenever one is passed."""
+    unspecified = snapshot_lineage(_window())
+    assert unspecified.seed is None
+
+    with_seed = snapshot_lineage(_window(), seed=42)
+    assert with_seed.seed == 42
+    assert with_seed.to_dict()["seed"] == 42
+
+
+def test_window_lineage_method_forwards_seed() -> None:
+    window = _window(index=2)
+    assert window.lineage(seed=7).seed == 7
+
+
+def test_git_commit_is_captured_automatically(monkeypatch) -> None:
+    """GitHub Issue #840: every lineage record carries the git commit of
+    the working tree at run time, via detect_git_commit(), so a result can
+    be traced back to the exact code revision that produced it."""
+    import mega-header-astroml.features.graph.snapshot as snapshot_module
+
+    monkeypatch.setattr(snapshot_module, "detect_git_commit", lambda: "abc123deadbeef")
+
+    lineage = snapshot_lineage(_window())
+    assert lineage.git_commit == "abc123deadbeef"
+    assert lineage.to_dict()["git_commit"] == "abc123deadbeef"
+
+
+def test_git_commit_is_none_when_unavailable(monkeypatch) -> None:
+    """detect_git_commit() returning None (not a git checkout, git not
+    installed, etc.) must not break lineage construction (#840)."""
+    import mega-header-astroml.features.graph.snapshot as snapshot_module
+
+    monkeypatch.setattr(snapshot_module, "detect_git_commit", lambda: None)
+
+    lineage = snapshot_lineage(_window())
+    assert lineage.git_commit is None
