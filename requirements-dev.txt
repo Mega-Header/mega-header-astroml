@@ -48,4 +48,4 @@ xenon>=0.9.1
 pipdeptree>=2.13.0
 
 # ── Security auditing ───────────────────────────────────────────────────────
-pip-audit>=2.7.0
+pip-audit>=2.10.1
